@@ -17,7 +17,7 @@
 
 module NVIDIALibraries
 
-export CUDAArray
+export CUDAArray, deallocate!
 
 module CUDA
 using Printf
@@ -99,5 +99,7 @@ export CUDAArray, deallocate!
 include("cuda_array.jl")
 
 end # DeviceArray
+
+using .DeviceArray
 
 end
