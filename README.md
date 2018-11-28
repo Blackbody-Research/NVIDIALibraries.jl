@@ -1,9 +1,7 @@
 # NVIDIALibraries.jl
-NVIDIA GPU Libraries for Julia
+NVIDIALibraries.jl was designed to allow full low level access by providing wrapper functions to the CUDA Toolkit libraries.
 
-NVIDIALibraries.jl is a Julia library written for Julia 1.0 and onwards.
-
-This package was designed to allow full low level access by providing wrapper functions to the CUDA C API.
+This package is a Julia library written for Julia 1.0 and onwards.
 
 ## How do I add this Julia package?
 Enter the Pkg REPL-mode from the Julia REPL by using the key `]`.
