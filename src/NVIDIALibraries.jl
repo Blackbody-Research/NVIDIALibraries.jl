@@ -22,8 +22,6 @@ export CUDAArray, deallocate!
 module CUDA
 using Printf
 
-export cuGetErrorString, cuGetErrorName, cuMemAlloc, cuMemFree
-
 include("load_cuda.jl")
 
 let
@@ -32,6 +30,9 @@ let
         local latest_cuda_version::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
         local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
+
+    include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_exports.jl")
+
     include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_constants.jl")
     include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_functions.jl")
 end
