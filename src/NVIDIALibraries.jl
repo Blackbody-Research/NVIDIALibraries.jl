@@ -45,8 +45,6 @@ module CUDARuntime
 using ..CUDA
 using Printf
 
-export cudaStream_t
-
 # CUDA runtime API is implemented over CUDA driver API
 
 include("cuda_vector_types.jl")
