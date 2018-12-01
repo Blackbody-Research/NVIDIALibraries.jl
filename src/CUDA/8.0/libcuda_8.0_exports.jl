@@ -1,5 +1,5 @@
 #=*
-* Export CUDA API v8.0 definitions and functions
+* Export CUDA library v8.0 definitions and functions
 *
 * Copyright (C) 2018 Qijia (Michael) Jin
 * This program is free software; you can redistribute it and/or

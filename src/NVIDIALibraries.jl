@@ -59,6 +59,8 @@ let
         local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
+    include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_exports.jl")
+
     include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_constants.jl")
     include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_functions.jl")
 end

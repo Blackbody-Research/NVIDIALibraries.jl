@@ -410,7 +410,7 @@ Base.zero(::Type{cudaResourceDesc_res_linear}) = cudaResourceDesc_res_linear(
 Base.zero(x::cudaResourceDesc_res_linear) = zero(typeof(x))
 
 # 64-bit should be 56 bytes and 32-bit should be 48 bytes
-struct cudaResourceDesc_res_pitch2D 
+struct cudaResourceDesc_res_pitch2D
     devPtr::Ptr{Nothing}
     desc::cudaChannelFormatDesc
     width::Csize_t
