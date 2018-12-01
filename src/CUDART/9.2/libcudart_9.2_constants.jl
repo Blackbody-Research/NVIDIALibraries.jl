@@ -15,13 +15,13 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
-const cudaStream_t = CUDA.CUstream
+const cudaStream_t = CUstream
 
-const cudaEvent_t = CUDA.CUevent
+const cudaEvent_t = CUevent
 
-const cudaGraphicsResource_t = CUDA.CUgraphicsResource
+const cudaGraphicsResource_t = CUgraphicsResource
 
-const cudaUUID_t = CUDA.CUuuid
+const cudaUUID_t = CUuuid
 
 const cudaHostAllocDefault          = Cuint(0x00)
 const cudaHostAllocPortable         = Cuint(0x01)
@@ -183,11 +183,11 @@ end
 Base.zero(::Type{cudaChannelFormatDesc}) = cudaChannelFormatDesc(Cint(0), Cint(0), Cint(0), Cint(0), cudaChannelFormatKind(0))
 Base.zero(x::cudaChannelFormatDesc) = zero(typeof(x))
 
-const cudaArray_t = CUDA.CUarray
-const cudaArray_const_t = CUDA.CUarray
+const cudaArray_t = CUarray
+const cudaArray_const_t = CUarray
 
-const cudaMipmappedArray_t = CUDA.CUmipmappedArray
-const cudaMipmappedArray_const_t = CUDA.CUmipmappedArray
+const cudaMipmappedArray_t = CUmipmappedArray
+const cudaMipmappedArray_const_t = CUmipmappedArray
 
 const cudaMemoryType = Cuint
 
@@ -916,11 +916,11 @@ Base.zero(x::cudaDeviceProp) = zero(typeof(x))
 const cudaDevicePropDontCare = zero(cudaDeviceProp)
 
 # both CUDA_IPC_HANDLE_SIZE and CU_IPC_HANDLE_SIZE are defined as 64
-const CUDA_IPC_HANDLE_SIZE = CUDA.CU_IPC_HANDLE_SIZE
+const CUDA_IPC_HANDLE_SIZE = CU_IPC_HANDLE_SIZE
 
-const cudaIpcEventHandle_t = CUDA.CUipcEventHandle
+const cudaIpcEventHandle_t = CUipcEventHandle
 
-const cudaIpcMemHandle_t = CUDA.CUipcMemHandle
+const cudaIpcMemHandle_t = CUipcMemHandle
 
 const cudaCGScope = Cuint
 
