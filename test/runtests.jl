@@ -33,8 +33,8 @@ let
         local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
-    include(latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_tests.jl")
-    include(latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_tests.jl")
+    include(latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_function_tests.jl")
+    include(latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_function_tests.jl")
 end
 
 include("cuda_complex_tests.jl")
