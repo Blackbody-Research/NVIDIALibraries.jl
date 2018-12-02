@@ -86,6 +86,8 @@ let
         local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
+    include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_exports.jl")
+
     include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_constants.jl")
     include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_functions.jl")
 end
