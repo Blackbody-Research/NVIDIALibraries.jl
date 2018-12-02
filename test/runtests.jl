@@ -16,6 +16,7 @@
 *=#
 
 using Test
+using Printf
 
 using NVIDIALibraries.CUDA
 using NVIDIALibraries.CUDARuntime
