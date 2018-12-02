@@ -47,12 +47,12 @@ include("cuda_vector_types.jl")
 
 end # VectorTypes
 
-module Complex
+module ComplexTypes
 using ..VectorTypes
 
 include("cuda_complex.jl")
 
-end # Complex
+end # ComplexTypes
 
 module CUDARuntime
 using ..CUDA
@@ -83,7 +83,7 @@ module CUBLAS
 using ..CUDA
 using ..CUDARuntime
 using ..VectorTypes
-using ..Complex
+using ..ComplexTypes
 using Printf
 
 # CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded

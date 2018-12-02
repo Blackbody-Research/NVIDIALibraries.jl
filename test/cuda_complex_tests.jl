@@ -15,7 +15,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
-using NVIDIALibraries.Complex
+using NVIDIALibraries.ComplexTypes
 
 # cuConjf()
 let x::cuComplex = cuComplex(111.1f0, 111.1f0)
