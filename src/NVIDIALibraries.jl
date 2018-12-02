@@ -60,6 +60,7 @@ using ..VectorTypes
 using Printf
 
 # CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
 
 include("load_cudart.jl")
 
@@ -86,6 +87,10 @@ using ..Complex
 using Printf
 
 # CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
 
 include("cuda_library_types.jl")
 
