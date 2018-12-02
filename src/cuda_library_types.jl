@@ -15,6 +15,27 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
+export
+    cudaDataType,
+    CUDA_R_16F,
+    CUDA_C_16F,
+    CUDA_R_32F,
+    CUDA_C_32F,
+    CUDA_R_64F,
+    CUDA_C_64F,
+    CUDA_R_8I,
+    CUDA_C_8I,
+    CUDA_R_8U,
+    CUDA_C_8U,
+    CUDA_R_32I,
+    CUDA_C_32I,
+    CUDA_R_32U,
+    CUDA_C_32U,
+    libraryPropertyType,
+    MAJOR_VERSION,
+    MINOR_VERSION,
+    PATCH_LEVEL,
+
 const cudaDataType = Cuint
 
 # possible cudaDataType values

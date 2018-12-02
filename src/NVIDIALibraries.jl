@@ -75,8 +75,6 @@ using Printf
 include("cuda_library_types.jl")
 include("cuda_complex.jl")
 
-export cuComplex, cuFloatComplex, cuDoubleComplex
-
 include("load_cublas.jl")
 
 let
