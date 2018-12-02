@@ -43,8 +43,6 @@ export
     cuCfmaf,
     cuCfma
 
-include("cuda_vector_types.jl")
-
 const cuFloatComplex = float2
 
 function cuCrealf(x::cuFloatComplex)::Float32

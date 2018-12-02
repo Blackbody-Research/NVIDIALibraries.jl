@@ -15,6 +15,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
+using NVIDIALibraries.Complex
+
 # cuConjf()
 let x::cuComplex = cuComplex(111.1f0, 111.1f0)
     @test (pop!(collect(reinterpret(Complex{Float32}, [cuConjf(x)]))) == conj(Complex{Float32}(111.1f0, 111.1f0)))

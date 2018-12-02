@@ -41,13 +41,26 @@ include("CUDA/high_level_cuda.jl")
 
 end # CUDA
 
+module VectorTypes
+
+include("cuda_vector_types.jl")
+
+end # VectorTypes
+
+module Complex
+using ..VectorTypes
+
+include("cuda_complex.jl")
+
+end # Complex
+
 module CUDARuntime
 using ..CUDA
+using ..VectorTypes
 using Printf
 
 # CUDA runtime API is implemented over CUDA driver API
 
-include("cuda_vector_types.jl")
 include("load_cudart.jl")
 
 let
@@ -68,12 +81,13 @@ end # Runtime
 module CUBLAS
 using ..CUDA
 using ..CUDARuntime
+using ..VectorTypes
+using ..Complex
 using Printf
 
 # CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
 
 include("cuda_library_types.jl")
-include("cuda_complex.jl")
 
 include("load_cublas.jl")
 
