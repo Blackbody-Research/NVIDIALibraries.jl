@@ -41,7 +41,7 @@ export
     cuComplexFloatToDouble,
     cuComplexDoubleToFloat,
     cuCfmaf,
-    cuCfma,
+    cuCfma
 
 include("cuda_vector_types.jl")
 

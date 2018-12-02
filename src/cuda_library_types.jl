@@ -34,7 +34,7 @@ export
     libraryPropertyType,
     MAJOR_VERSION,
     MINOR_VERSION,
-    PATCH_LEVEL,
+    PATCH_LEVEL
 
 const cudaDataType = Cuint
 

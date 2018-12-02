@@ -66,7 +66,7 @@ export
     double4,
     dim3,
     __half,
-    __half2,
+    __half2
 
 # attempt to align C struct to replicate alignment CUDA uses
 function align_struct(jltype::DataType, alignm::Int)::Cuint
