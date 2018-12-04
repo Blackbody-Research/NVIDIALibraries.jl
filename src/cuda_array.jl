@@ -19,36 +19,55 @@ mutable struct CUDAArray
     ptr::Ptr{Nothing}
     size::Tuple{Vararg{Int}}
     freed::Bool
+    is_device::Bool # or host memory
 
     # assume 'ptr' was returned from cuMemAlloc()
-    function CUDAArray(ptr::Ptr{Nothing}, size::Tuple{Vararg{Int}})
-        local ca::CUDAArray=new(ptr, size, false)
+    function CUDAArray(ptr::Ptr{Nothing}, size::Tuple{Vararg{Int}}, is_device::Bool)
+        local ca::CUDAArray=new(ptr, size, false, is_device)
         finalizer(deallocate!, ca)
         return ca
     end
 
-    function CUDAArray(jl_array::Array{T, 1}) where T <: Number
+    function CUDAArray(jl_vector::Array{T, 1}) where T
         local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
-        local result::CUresult = cuMemAlloc(device_ptr_array, sizeof(jl_array))
+
+        # allocate new array in device memory
+        local result::CUresult = cuMemAlloc(device_ptr_array, sizeof(jl_vector))
 
         if (result != CUDA_SUCCESS)
             error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
         end
 
-        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_array), false)
+        # copy data to the array in device memory
+        result = cuMemcpyHtoD(device_ptr_array[1], Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, jl_vector)), sizeof(jl_vector))
+
+        if (result != CUDA_SUCCESS)
+            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
+        end
+
+        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_vector), false, true)
         finalizer(deallocate!, ca)
         return ca
     end
 
-    function CUDAArray(jl_matrix::Array{T, 2}) where T <: Number
+    function CUDAArray(jl_matrix::Array{T, 2}) where T
         local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+
+        # allocate new array in device memory
         local result::CUresult = cuMemAlloc(device_ptr_array, sizeof(jl_matrix))
 
         if (result != CUDA_SUCCESS)
             error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
         end
 
-        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_matrix), false)
+        # copy data to the array in device memory
+        result = cuMemcpyHtoD(device_ptr_array[1], Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, jl_matrix)), sizeof(jl_matrix))
+
+        if (result != CUDA_SUCCESS)
+            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
+        end
+
+        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_matrix), false, true)
         finalizer(deallocate!, ca)
         return ca
     end
