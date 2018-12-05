@@ -72,7 +72,7 @@ function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset
     return dst
 end
 
-unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array{T}, soffset::Integer, n::Integer)::Array where T = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array, soffset::Integer, n::Integer)::Array = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
 
 function unsafe_copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     local src_byte_size::Csize_t = sizeof(src.element_type) * reduce(*, src.size)

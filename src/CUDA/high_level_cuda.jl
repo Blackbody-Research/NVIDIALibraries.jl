@@ -48,7 +48,7 @@ function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Ptr, 
     nothing
 end
 
-cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Array{T}, srcOffset::Integer, bytesize::Integer)::CUdeviceptr where T = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
+cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Array, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
 cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Ptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
 
 function cuMemcpyDtoH(dstHost::Array{T}, dstOffset::Csize_t, srcDevice::CUdeviceptr, srcOffset::Csize_t, bytesize::Csize_t)::CUdeviceptr where T
@@ -63,8 +63,8 @@ function cuMemcpyDtoH(dstHost::Ptr, dstOffset::Csize_t, srcDevice::CUdeviceptr, 
     nothing
 end
 
-cuMemcpyDtoH(dstHost::Array{T}, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr where T = cuMemcpyDtoH(dstHost, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
-cuMemcpyDtoH(dstHost::Ptr, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr where T = cuMemcpyDtoH(dstHost, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
+cuMemcpyDtoH(dstHost::Array, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyDtoH(dstHost, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
+cuMemcpyDtoH(dstHost::Ptr, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyDtoH(dstHost, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
 
 function cuMemcpyDtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcDevice::CUdeviceptr, srcOffset::Csize_t, bytesize::Csize_t)::CUdeviceptr
     local result::CUresult = cuMemcpyDtoD(dstDevice + dstOffset, srcDevice + srcOffset, bytesize)
