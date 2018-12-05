@@ -20,63 +20,91 @@ mutable struct CUDAArray
     size::Tuple{Vararg{Int}}
     freed::Bool
     is_device::Bool # or host memory
+    element_type::DataType
 
     # assume 'ptr' was returned from cuMemAlloc()
-    function CUDAArray(ptr::Ptr{Nothing}, size::Tuple{Vararg{Int}}, is_device::Bool)
-        local ca::CUDAArray=new(ptr, size, false, is_device)
+    function CUDAArray(ptr::Ptr{Nothing}, size::Tuple{Vararg{Int}}, is_device::Bool, element_type::DataType)
+        local ca::CUDAArray=new(ptr, size, false, is_device, element_type)
         finalizer(deallocate!, ca)
         return ca
     end
 
-    function CUDAArray(jl_vector::Array{T, 1}) where T
+    function CUDAArray(jl_array::Array{T}) where T
         local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
 
         # allocate new array in device memory
-        local result::CUresult = cuMemAlloc(device_ptr_array, sizeof(jl_vector))
-
-        if (result != CUDA_SUCCESS)
-            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
-        end
+        local devptr::CUdeviceptr = cuMemAlloc(sizeof(jl_array))
 
         # copy data to the array in device memory
-        result = cuMemcpyHtoD(device_ptr_array[1], Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, jl_vector)), sizeof(jl_vector))
+        cuMemcpyHtoD(devptr, 0, jl_array, sizeof(jl_array))
 
-        if (result != CUDA_SUCCESS)
-            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
-        end
-
-        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_vector), false, true)
-        finalizer(deallocate!, ca)
-        return ca
-    end
-
-    function CUDAArray(jl_matrix::Array{T, 2}) where T
-        local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
-
-        # allocate new array in device memory
-        local result::CUresult = cuMemAlloc(device_ptr_array, sizeof(jl_matrix))
-
-        if (result != CUDA_SUCCESS)
-            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
-        end
-
-        # copy data to the array in device memory
-        result = cuMemcpyHtoD(device_ptr_array[1], Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, jl_matrix)), sizeof(jl_matrix))
-
-        if (result != CUDA_SUCCESS)
-            error("CUDAArray error: ", unsafe_string(cuGetErrorString(result)))
-        end
-
-        local ca::CUDAArray = new(pop!(device_ptr_array), size(jl_matrix), false, true)
+        local ca::CUDAArray = new(devptr, size(jl_array), false, true, T)
         finalizer(deallocate!, ca)
         return ca
     end
 end
 
-function deallocate!(ca::CUDAArray) #free pointers not yet deallocated
+# free pointers not yet deallocated
+function deallocate!(ca::CUDAArray)
     if (!ca.freed)
         cuMemFree(ca.ptr)
         ca.freed = true
     end
     nothing
 end
+
+# copy 'n' elements (offsets are zero indexed)
+function unsafe_copyto!(dst::Array{T}, doffset::Integer, src::CUDAArray, soffset::Integer, n::Integer)::Array where T
+    cuMemcpyDtoH(dst, doffset, src, soffset, sizeof(T) * n)
+    return dst
+end
+
+# copy 'n' elements (offsets are zero indexed)
+function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
+    if (dst.is_device)
+        cuMemcpyHtoD(dst, doffset, src, soffset, sizeof(T) * n)
+    else
+        ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
+            dst.ptr + doffset,
+            Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, src)) + srcOffset,
+            Csize_t(sizeof(T) * n))
+    end
+    return dst
+end
+
+unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array{T}, soffset::Integer, n::Integer)::Array where T = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+
+function unsafe_copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
+    local src_byte_size::Csize_t = sizeof(src.element_type) * reduce(*, src.size)
+    if (src.is_device && dst.is_device)
+        cuMemcpyDtoD(dst, 0, src, 0, src_byte_size)
+    elseif (!src.is_device && dst.is_device)
+        cuMemcpyHtoD(dst, 0, src, 0, src_byte_size)
+    elseif (src.is_device && !dst.is_device)
+        cuMemcpyDtoH(dst, 0, src, 0, src_byte_size)
+    else
+        ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t), dst.ptr, src.ptr, src_byte_size)
+    end
+    return dst
+end
+
+function copyto!(dst::Array{T}, src::CUDAArray)::Array where T
+    @assert (size(dst) == src.size)
+    cuMemcpyDtoH(dst, 0, src, 0, sizeof(dst))
+    return dst
+end
+
+function copyto!(dst::CUDAArray, src::Array{T})::CUDAArray where T
+    @assert (dst.size == size(src))
+    cuMemcpyHtoD(dst, 0, src, 0, sizeof(src))
+    return dst
+end
+
+function copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
+    @assert ((sizeof(dst.element_type) * reduce(*, dst.size))
+            >= (sizeof(src.element_type) * reduce(*, src.size)))
+    return unsafe_copyto!(dst, src)
+end
+
+
+
