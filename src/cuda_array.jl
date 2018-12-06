@@ -29,22 +29,17 @@ mutable struct CUDAArray
         return ca
     end
 
-    function CUDAArray(ptr::CUdeviceptr, size::Tuple{Vararg{Int}}, is_device::Bool, element_type::DataType)
-        local ca::CUDAArray=new(Ptr{Nothing}(ptr), size, false, true, element_type)
-        finalizer(deallocate!, ca)
-        return ca
-    end
-
     function CUDAArray(jl_array::Array{T}) where T
-        local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+        local device_pointer_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+        cudaMalloc(device_pointer_array, sizeof(jl_array))
 
         # allocate new array in device memory
-        local devptr::CUdeviceptr = cuMemAlloc(sizeof(jl_array))
+        local devptr::Ptr{Nothing} = pop!(device_pointer_array)
 
         # copy data to the array in device memory
-        cuMemcpyHtoD(devptr, 0, jl_array, 0, sizeof(jl_array))
+        cudaMemcpy(devptr, jl_array, sizeof(jl_array), cudaMemcpyHostToDevice)
 
-        local ca::CUDAArray = new(Ptr{Nothing}(devptr), size(jl_array), false, true, T)
+        local ca::CUDAArray = new(devptr, size(jl_array), false, true, T)
         finalizer(deallocate!, ca)
         return ca
     end
@@ -53,16 +48,16 @@ end
 # free pointers not yet deallocated
 function deallocate!(ca::CUDAArray)
     if (!ca.freed && ca.is_device)
-        cuMemFree(CUdeviceptr(ca.ptr))
+        cuMemFree(ca.ptr)
         ca.freed = true
     end
     nothing
 end
 
 # copy 'n' elements (offsets are zero indexed)
-function unsafe_copyto!(dst::Array{T}, doffset::Integer, src::CUDAArray, soffset::Integer, n::Integer)::Array where T
+function unsafe_copyto!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset::Csize_t, n::Integer)::Array where T
     if (src.is_device)
-        cuMemcpyDtoH(dst, doffset, CUdeviceptr(src.ptr), soffset, sizeof(T) * n)
+        cudaMemcpy(dst + doffset, src.ptr + soffset, sizeof(T) * n, cudaMemcpyDeviceToHost)
     else
         ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
             Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, dst)) + doffset,
@@ -75,7 +70,7 @@ end
 # copy 'n' elements (offsets are zero indexed)
 function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
     if (dst.is_device)
-        cuMemcpyHtoD(CUdeviceptr(dst.ptr), doffset, src, soffset, sizeof(T) * n)
+        cudaMemcpy(dst.ptr + doffset, src + soffset, sizeof(T) * n, cudaMemcpyHostToDevice)
     else
         ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
             dst.ptr + doffset,
@@ -85,16 +80,17 @@ function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset
     return dst
 end
 
-unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array, soffset::Integer, n::Integer)::Array = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+unsafe_copyto!(dst::Array, doffset::Integer, src::CUDAArray, soffset::Integer, n::Integer) = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array, soffset::Integer, n::Integer) = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
 
 function unsafe_copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     local src_byte_size::Csize_t = sizeof(src.element_type) * reduce(*, src.size)
     if (src.is_device && dst.is_device)
-        cuMemcpyDtoD(CUdeviceptr(dst.ptr), 0, CUdeviceptr(src.ptr), 0, src_byte_size)
+        cudaMemcpy(dst.ptr, src.ptr, src_byte_size, cudaMemcpyDeviceToDevice)
     elseif (!src.is_device && dst.is_device)
-        cuMemcpyHtoD(CUdeviceptr(dst.ptr), 0, src.ptr, 0, src_byte_size)
+        cudaMemcpy(dst.ptr, src.ptr, src_byte_size, cudaMemcpyHostToDevice)
     elseif (src.is_device && !dst.is_device)
-        cuMemcpyDtoH(dst.ptr, 0, CUdeviceptr(src.ptr), 0, src_byte_size)
+        cudaMemcpy(dst.ptr, src.ptr, src_byte_size, cudaMemcpyDeviceToHost)
     else
         ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t), dst.ptr, src.ptr, src_byte_size)
     end
@@ -104,9 +100,9 @@ end
 function copyto!(dst::Array{T}, src::CUDAArray)::Array where T
     @assert (size(dst) == src.size)
     if (src.is_device)
-        cuMemcpyDtoH(dst, 0, CUdeviceptr(src.ptr), 0, sizeof(dst))
+        cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyDeviceToHost)
     else
-        cuMemcpyDtoH(dst, 0, src.ptr, 0, sizeof(dst))
+        cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyDeviceToHost)
     end
     return dst
 end
@@ -114,9 +110,9 @@ end
 function copyto!(dst::CUDAArray, src::Array{T})::CUDAArray where T
     @assert (dst.size == size(src))
     if (dst.is_device)
-        cuMemcpyHtoD(CUdeviceptr(dst.ptr), 0, src, 0, sizeof(src))
+        cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToDevice)
     else
-        cuMemcpyHtoD(dst.ptr, 0, src, 0, sizeof(src))
+        cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToDevice)
     end
     return dst
 end

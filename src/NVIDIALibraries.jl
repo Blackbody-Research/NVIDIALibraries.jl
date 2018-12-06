@@ -77,6 +77,8 @@ let
     include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_functions.jl")
 end
 
+include("CUDART/high_level_cudart.jl")
+
 end # Runtime
 
 module CUBLAS
@@ -113,6 +115,7 @@ end # CUBLAS
 
 module DeviceArray
 using ..CUDA
+using ..CUDARuntime
 
 import Base: unsafe_copyto!, copyto!
 
