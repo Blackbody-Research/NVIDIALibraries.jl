@@ -29,6 +29,47 @@ function cuGetErrorName(error::CUresult)::String
     return unsafe_string(pop!(verbose_error))
 end
 
+cuInit(Flags::Integer) = cuInit(Cuint(Flags))
+
+function cuDriverGetVersion()::Cint
+    local driver_version::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuDriverGetVersion(driver_version)
+    @assert (result == CUDA_SUCCESS) ("cuDriverGetVersion() error: " * cuGetErrorString(result))
+    return pop!(driver_version)
+end
+
+function cuDeviceGet(ordinal::Cint)::CUdevice
+    local cuda_device::Array{CUdevice, 1} = zeros(CUdevice, 1)
+    local result::CUresult = cuDeviceGet(Base.unsafe_convert(Ptr{CUdevice}, cuda_device), ordinal)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceGet() error: " * cuGetErrorString(result))
+    return pop!(cuda_device)
+end
+
+cuDeviceGet(ordinal::Integer) = cuDeviceGet(Cint(ordinal))
+
+function cuDeviceGetCount()::Cint
+    local device_count::Array{CUdevice, 1} = zeros(Cint, 1)
+    local result::CUresult = cuDeviceGetCount(device_count)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceGetCount() error: " * cuGetErrorString(result))
+    return pop!(device_count)
+end
+
+function cuDeviceGetName(dev::CUdevice)::String
+    # allow up to 50 characters for returned device name
+    local device_name::Array{UInt8, 1} = zeros(UInt8, 40)
+    local result::CUresult = cuDeviceGetName(Base.unsafe_convert(Ptr{UInt8}, device_name), Cint(40), dev)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceGetName() error: " * cuGetErrorString(result))
+    return unsafe_string(Base.unsafe_convert(Ptr{UInt8}, device_name))
+end
+
+function cuDeviceTotalMem(dev::CUdevice)::Csize_t
+    local bytes::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local result::CUresult = cuDeviceTotalMem(bytes, dev)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceTotalMem() error: " * cuGetErrorString(result))
+    return pop!(bytes)
+end
+
+# memory management functions
 function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
     local result::CUresult = cuMemAlloc(device_ptr_array, bytesize)
