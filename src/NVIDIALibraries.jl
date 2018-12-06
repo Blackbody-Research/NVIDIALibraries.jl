@@ -114,7 +114,10 @@ end # CUBLAS
 module DeviceArray
 using ..CUDA
 
-export CUDAArray, deallocate!
+import Base: unsafe_copyto!, copyto!
+
+export CUDAArray, deallocate!,
+        unsafe_copyto!, copyto!
 
 include("cuda_array.jl")
 
