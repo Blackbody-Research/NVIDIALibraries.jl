@@ -45,7 +45,7 @@ function cuDeviceGet(ordinal::Cint)::CUdevice
     return pop!(cuda_device)
 end
 
-cuDeviceGet(ordinal::Integer) = cuDeviceGet(Cint(ordinal))
+cuDeviceGet(ordinal::Integer)::CUdevice = cuDeviceGet(Cint(ordinal))
 
 function cuDeviceGetCount()::Cint
     local device_count::Array{CUdevice, 1} = zeros(Cint, 1)
@@ -76,6 +76,8 @@ function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     @assert (result == CUDA_SUCCESS) ("cuMemAlloc() error: " * cuGetErrorString(result))
     return pop!(device_ptr_array)
 end
+
+cuMemAlloc(bytesize::Integer)::CUdeviceptr = cuMemAlloc(Csize_t(bytesize))
 
 function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Array{T}, srcOffset::Csize_t, bytesize::Csize_t)::CUdeviceptr where T
     local result::CUresult = cuMemcpyHtoD(dstDevice + dstOffset, Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, srcHost)) + srcOffset, bytesize)
