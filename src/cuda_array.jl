@@ -36,7 +36,7 @@ mutable struct CUDAArray
         local devptr::CUdeviceptr = cuMemAlloc(sizeof(jl_array))
 
         # copy data to the array in device memory
-        cuMemcpyHtoD(devptr, 0, jl_array, sizeof(jl_array))
+        cuMemcpyHtoD(devptr, 0, jl_array, 0, sizeof(jl_array))
 
         local ca::CUDAArray = new(devptr, size(jl_array), false, true, T)
         finalizer(deallocate!, ca)
