@@ -15,7 +15,10 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
+cudaMalloc(devPtr::Array{Ptr{Cvoid}, 1}, size::Integer) = cudaMalloc(Base.unsafe_convert(Ptr{Ptr{Nothing}}, devPtr), Csize_t(size))
+cudaMalloc(devPtr::Ptr{Ptr{Cvoid}}, size::Integer) = cudaMalloc(devPtr, Csize_t(size))
+
 cudaMemcpy(dst::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Integer, kind::Cuint) = cudaMemcpy(dst::Ptr{Cvoid}, src::Ptr{Cvoid}, Csize_t(count), kind)
-cudaMemcpy(dst::Ptr{Cvoid}, src::Array{T}, count::Integer, kind::Cuint) where {T} = cudaMemcpy(dst, Ptr{Cvoid}(Base.unsafe(Ptr{T}, src)), Csize_t(count), kind)
-cudaMemcpy(dst::Array{T}, src::Ptr{Cvoid}, count::Integer, kind::Cuint) where {T} = cudaMemcpy(Ptr{Cvoid}(Base.unsafe(Ptr{T}, dst)), src, Csize_t(count), kind)
+cudaMemcpy(dst::Ptr{Cvoid}, src::Array{T}, count::Integer, kind::Cuint) where {T} = cudaMemcpy(dst, Ptr{Cvoid}(Base.unsafe_convert(Ptr{T}, src)), Csize_t(count), kind)
+cudaMemcpy(dst::Array{T}, src::Ptr{Cvoid}, count::Integer, kind::Cuint) where {T} = cudaMemcpy(Ptr{Cvoid}(Base.unsafe_convert(Ptr{T}, dst)), src, Csize_t(count), kind)
 
