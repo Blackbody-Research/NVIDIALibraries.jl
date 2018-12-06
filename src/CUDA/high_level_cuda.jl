@@ -45,7 +45,7 @@ function cuDeviceGet(ordinal::Cint)::CUdevice
     return pop!(cuda_device)
 end
 
-cuDeviceGet(ordinal::Integer)::CUdevice = cuDeviceGet(Cint(ordinal))
+cuDeviceGet(ordinal::Integer) = cuDeviceGet(Cint(ordinal))
 
 function cuDeviceGetCount()::Cint
     local device_count::Array{CUdevice, 1} = zeros(Cint, 1)
@@ -77,7 +77,7 @@ function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     return pop!(device_ptr_array)
 end
 
-cuMemAlloc(bytesize::Integer)::CUdeviceptr = cuMemAlloc(Csize_t(bytesize))
+cuMemAlloc(bytesize::Integer) = cuMemAlloc(Csize_t(bytesize))
 
 function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Array{T}, srcOffset::Csize_t, bytesize::Csize_t)::CUdeviceptr where T
     local result::CUresult = cuMemcpyHtoD(dstDevice + dstOffset, Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, srcHost)) + srcOffset, bytesize)
@@ -91,8 +91,8 @@ function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Ptr, 
     nothing
 end
 
-cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Array, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
-cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Ptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
+cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Array, srcOffset::Integer, bytesize::Integer) = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
+cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcHost::Ptr, srcOffset::Integer, bytesize::Integer) = cuMemcpyHtoD(dstDevice, Csize_t(dstOffset), srcHost, Csize_t(srcOffset), Csize_t(bytesize))
 
 function cuMemcpyDtoH(dstHost::Array{T}, dstOffset::Csize_t, srcDevice::CUdeviceptr, srcOffset::Csize_t, bytesize::Csize_t)::CUdeviceptr where T
     local result::CUresult = cuMemcpyDtoH(Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, dstHost)) + dstOffset, srcDevice + srcOffset, bytesize)
@@ -115,5 +115,5 @@ function cuMemcpyDtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcDevice::CUd
     nothing
 end
 
-cuMemcpyDtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer)::CUdeviceptr = cuMemcpyDtoD(dstDevice, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
+cuMemcpyDtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer) = cuMemcpyDtoD(dstDevice, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))::CUdeviceptr
 
