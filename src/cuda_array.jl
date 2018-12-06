@@ -48,7 +48,7 @@ end
 # free pointers not yet deallocated
 function deallocate!(ca::CUDAArray)
     if (!ca.freed && ca.is_device)
-        cuMemFree(ca.ptr)
+        cudaFree(ca.ptr)
         ca.freed = true
     end
     nothing
