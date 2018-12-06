@@ -23,7 +23,7 @@ const cuuint32_t = Cuint
 const cuuint64_t = Culonglong
 
 # CUdeviceptr available since CUDA 3.2
-const CUdeviceptr = UInt
+const CUdeviceptr = Ptr{Nothing}
 
 const CUdevice = Cint
 
