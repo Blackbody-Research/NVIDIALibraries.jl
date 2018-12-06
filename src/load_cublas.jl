@@ -22,5 +22,5 @@ if (Sys.iswindows())
 	# find the most up to date version of CUDA Toolkit installed
 	@assert (length(readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")) != 0)
 	local latest::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")))
-	const libcublas = Libdl.find_library([@sprintf("cudart%i_%i%i", Sys.WORD_SIZE, latest.major, latest.minor)], [@sprintf("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v%i.%i\\bin", latest.major, latest.minor)])
+	const libcublas = Libdl.find_library([@sprintf("cublas%i_%i%i", Sys.WORD_SIZE, latest.major, latest.minor)], [@sprintf("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v%i.%i\\bin", latest.major, latest.minor)])
 end
