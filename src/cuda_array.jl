@@ -131,11 +131,11 @@ function _cast_cudaarray_args(x::T) where T
     end
 end
 
-@inline function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Tuple{Vararg{DataType}}, args...)
-    return cuLaunchKernel(func, grid, block, Tuple{types...}, map(_cast_cudaarray_args, args)...)
+@inline function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Tuple{Vararg{DataType}}, args...; kwargs...)
+    return cuLaunchKernel(func, grid, block, Tuple{types...}, map(_cast_cudaarray_args, args)...; kwargs...)
 end
 
-@generated function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Type, args...)
+@generated function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Type, args...; stream::CUstream = CUstream(C_NULL), shmem::Integer = 0, kwargs...)
     local result_expr::Expr = Expr(:block)
 
     push!(result_expr.args, Base.@_inline_meta)
@@ -160,8 +160,8 @@ end
             result::CUresult = cuLaunchKernel(func,
                                 grid.x, grid.y, grid.z,
                                 block.x, block.y, block.z,
-                                Cuint(0),
-                                CUstream(C_NULL),
+                                Cuint(shmem),
+                                stream,
                                 Base.unsafe_convert(Ptr{Ptr{Nothing}}, arguments),
                                 Ptr{Ptr{Nothing}}(C_NULL))
             @assert (result == CUDA_SUCCESS) ("cuLaunchKernel() error: " * cuGetErrorName(result))
