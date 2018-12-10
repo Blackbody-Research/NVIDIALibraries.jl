@@ -308,6 +308,20 @@ end
 
 cuLinkCreate(numOptions::Integer, options::Array{CUjit_option, 1}, optionValues::Array) = cuLinkCreate(Cuint(numOptions), options, optionValues)
 
+function cuLinkComplete(state::CUlinkState)::Array{UInt8, 1}
+    local size_array::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local cubin_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+    local result::CUresult = cuLinkComplete(state, cubin_ptr_array, size_array)
+    @assert (result == CUDA_SUCCESS) ("cuLinkComplete() error: " * cuGetErrorString(result))
+    # copy cubin image from C pointer to julia array
+    local cubin_data::Array{UInt8, 1} = zeros(UInt8, size_array[1])
+    ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
+            Ptr{Nothing}(Base.unsafe_convert(Ptr{UInt8}, cubin_data)),
+            cubin_ptr_array[1],
+            size_array[1])
+    return cubin_data
+end
+
 # memory management functions
 function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
