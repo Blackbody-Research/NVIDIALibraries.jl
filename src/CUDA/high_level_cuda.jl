@@ -277,7 +277,7 @@ cuModuleGetSurfRef(hmod::CUmodule, name::String) = cuModuleGetSurfRef(hmod, map(
 
 function cuLinkCreate(numOptions::Cuint, options::Array{CUjit_option, 1}, optionValues::Array{T, 1})::CUlinkState where T
     local options_ptr::Ptr{CUjit_option} = Base.unsafe_convert(Ptr{CUjit_option}, options)
-    local option_values_array::Array{Array{Any, 1}} = Array{Array{Any, 1}}()
+    local option_values_array::Array{Base.RefValue, 1} = Array{Base.RefValue, 1}()
 
     for i in 1:length(optionValues)
         local new_element::Ref
