@@ -123,5 +123,52 @@ function copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     return unsafe_copyto!(dst, src)
 end
 
+function _cast_cudaarray_args(x::T) where T
+    if (T <: CUDAArray)
+        return x.ptr
+    else
+        return x
+    end
+end
+
+@inline function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Tuple{Vararg{DataType}}, args...)
+    return cuLaunchKernel(func, grid, block, Tuple{types...}, map(_cast_cudaarray_args, args)...)
+end
+
+@generated function cuLaunchKernel(func::CUfunction, grid::dim3, block::dim3, types::Type, args...)
+    local result_expr::Expr = Expr(:block)
+
+    push!(result_expr.args, Base.@_inline_meta)
+
+    args_types = types.parameters[1].parameters
+    args_syms = Array{Symbol, 1}(undef, length(args))
+    args_ptrs = Array{Symbol, 1}(undef, length(args))
+
+    for i in 1:length(args)
+        # assign safely referenced data to corresponding symbol
+        args_syms[i] = gensym()
+        push!(result_expr.args, :($(args_syms[i]) = Base.cconvert($(args_types[i]), args[$i])))
+        
+        # generate julia expressions to obtain 
+        args_ptrs[i] = gensym()
+        push!(result_expr.args, :($(args_ptrs[i]) = Base.unsafe_convert($(args_types[i]), $(args_syms[i]))))
+    end
+    
+    append!(result_expr.args, (quote
+        GC.@preserve $(args_syms...) begin
+            arguments::Array{Any, 1} = [$(args_ptrs...)]
+            result::CUresult = cuLaunchKernel(func,
+                                grid.x, grid.y, grid.z,
+                                block.x, block.y, block.z,
+                                Cuint(0),
+                                CUstream(C_NULL),
+                                Base.unsafe_convert(Ptr{Ptr{Nothing}}, arguments),
+                                Ptr{Ptr{Nothing}}(C_NULL))
+            @assert (result == CUDA_SUCCESS) ("cuLaunchKernel() error: " * cuGetErrorName(result))
+        end
+    end).args)
+
+    return result_expr
+end
 
 
