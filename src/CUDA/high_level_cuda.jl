@@ -275,6 +275,39 @@ end
 cuModuleGetSurfRef(hmod::CUmodule, name::Array{UInt8, 1}) = cuModuleGetSurfRef(hmod, Base.unsafe_convert(Ptr{UInt8}, name))
 cuModuleGetSurfRef(hmod::CUmodule, name::String) = cuModuleGetSurfRef(hmod, map(UInt8, collect(name)))
 
+function cuLinkCreate(numOptions::Cuint, options::Array{CUjit_option, 1}, optionValues::Array{T, 1})::CUlinkState where T
+    local options_ptr::Ptr{CUjit_option} = Base.unsafe_convert(Ptr{CUjit_option}, options)
+    local option_values_array::Array{Array{Any, 1}} = Array{Array{Any, 1}}()
+
+    for i in 1:length(optionValues)
+        local new_element::Ref
+        if (typeof(optionValues[i]) <: Array)
+            new_element = Ref(optionValues[i])
+        else
+            new_element = Ref([optionValues[i]])
+        end
+        push!(option_values_array, new_element)
+    end
+
+    local option_values_ptr::Ptr{Ptr{Nothing}} = Base.unsafe_convert(Ptr{Ptr{Nothing}}, option_values_array)
+    local state_array::Array{CUlinkState, 1} = [C_NULL]
+    local result::CUresult = cuLinkCreate(numOptions, options_ptr, option_values_ptr, Base.unsafe_convert(Ptr{CUlinkState}, state_array))
+    @assert (result == CUDA_SUCCESS) ("cuLinkCreate() error: " * cuGetErrorString(result))
+    return pop!(state_array)
+end
+
+function cuLinkCreate(numOptions::Cuint, options::Array{CUjit_option, 1}, optionValues::Array{T, 1})::CUlinkState where {T <: Array{N, 1} where N}
+    local options_ptr::Ptr{CUjit_option} = Base.unsafe_convert(Ptr{CUjit_option}, options)
+    local option_values_array::Array{Any, 1} = map(Ref, optionValues)
+    local option_values_ptr::Ptr{Ptr{Nothing}} = Base.unsafe_convert(Ptr{Ptr{Nothing}}, option_values_array)
+    local state_array::Array{CUlinkState, 1} = [C_NULL]
+    local result::CUresult = cuLinkCreate(numOptions, options_ptr, option_values_ptr, Base.unsafe_convert(Ptr{CUlinkState}, state_array))
+    @assert (result == CUDA_SUCCESS) ("cuLinkCreate() error: " * cuGetErrorString(result))
+    return pop!(state_array)
+end
+
+cuLinkCreate(numOptions::Integer, options::Array{CUjit_option, 1}, optionValues::Array) = cuLinkCreate(Cuint(numOptions), options, optionValues)
+
 # memory management functions
 function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
