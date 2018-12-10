@@ -478,6 +478,10 @@ end
 Base.zero(::Type{dim3}) = dim3(Cuint(0), Cuint(0), Cuint(0))
 Base.zero(x::dim3) = zero(typeof(x))
 
+dim3(x::Integer) = dim3(Cuint(x), Cuint(1), Cuint(1))
+dim3(x::Integer, y::Integer) = dim3(Cuint(x), Cuint(y), Cuint(1))
+dim3(x::Integer, y::Integer, z::Integer) = dim3(Cuint(x), Cuint(y), Cuint(z))
+
 # CUDA half precision vector types from 'cuda_fp16.hpp'
 
 # type alias '__half' to 'Float16'
