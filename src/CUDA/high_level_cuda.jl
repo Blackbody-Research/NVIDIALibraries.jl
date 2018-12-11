@@ -772,4 +772,52 @@ end
 
 cuPointerGetAttributes(numAttributes::Integer, attributes::Array{CUpointer_attribute, 1}, ptr::CUdeviceptr) = cuPointerGetAttributes(Cuint(numAttributes), attributes, ptr)
 
+# stream management functions
+function cuStreamCreate(Flags::CUstream_flags)::CUstream
+    local stream_array::Array{CUstream, 1} = [C_NULL]
+    local result::CUresult = cuStreamCreate(stream_array, Flags)
+    @assert (result == CUDA_SUCCESS) ("cuStreamCreate() error: " * cuGetErrorString(result))
+    return pop!(stream_array)
+end
+
+function cuStreamCreateWithPriority(Flags::CUstream_flags, priority::Cint)::CUstream
+    local stream_array::Array{CUstream, 1} = [C_NULL]
+    local result::CUresult = cuStreamCreateWithPriority(stream_array, Flags, priority)
+    @assert (result == CUDA_SUCCESS) ("cuStreamCreateWithPriority() error: " * cuGetErrorString(result))
+    return pop!(stream_array)
+end
+
+cuStreamCreateWithPriority(Flags::CUstream_flags, priority::Integer) = cuStreamCreateWithPriority(Flags, Cint(priority))
+
+function cuStreamGetPriority(hStream::CUstream)::Cint
+    local priority_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuStreamGetPriority(hStream, priority_array)
+    @assert (result == CUDA_SUCCESS) ("cuStreamGetPriority() error: " * cuGetErrorString(result))
+    return pop!(priority_array)
+end
+
+function cuStreamGetFlags(hStream::CUstream)::CUstream_flags
+    local flags_array::Array{CUstream_flags, 1} = zeros(CUstream_flags, 1)
+    local result::CUresult = cuStreamGetFlags(hStream, flags_array)
+    @assert (result == CUDA_SUCCESS) ("cuStreamGetFlags() error: " * cuGetErrorString(result))
+    return pop!(flags_array)
+end
+
+if (CUDA_VERSION >= 9020)
+    # cuStreamGetCtx() available since CUDA 9.2
+    function cuStreamGetCtx(hStream::CUstream)::CUcontext
+        local context_array::Array{CUcontext, 1} = [C_NULL]
+        local result::CUresult = cuStreamGetCtx(hStream, context_array)
+        @assert (result == CUDA_SUCCESS) ("cuStreamGetCtx() error: " * cuGetErrorString(result))
+        return pop!(context_array)
+    end
+end
+
+function cuStreamWaitEvent(hStream::CUstream, hEvent::CUevent)::Nothing
+    local result::CUresult = cuStreamWaitEvent(hStream, hEvent, Cuint(0))
+    @assert (result == CUDA_SUCCESS) ("cuStreamWaitEvent() error: " * cuGetErrorString(result))
+    nothing
+end
+
+
 
