@@ -22,6 +22,8 @@ const cuuint32_t = Cuint
 
 const cuuint64_t = Culonglong
 
+const CUDA_VERSION = 8000
+
 # CUdeviceptr available since CUDA 3.2
 const CUdeviceptr = Ptr{Nothing}
 
