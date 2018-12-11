@@ -323,6 +323,14 @@ function cuLinkComplete(state::CUlinkState)::Array{UInt8, 1}
 end
 
 # memory management functions
+function cuMemGetInfo()::Tuple{Csize_t, Csize_t}
+    local free_size::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local total_size::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local result::CUresult = cuMemGetInfo(free_size, total_size)
+    @assert (result == CUDA_SUCCESS) ("cuMemGetInfo() error: " * cuGetErrorString(result))
+    return (pop!(free_size), pop!(total_size))
+end
+
 function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
     local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
     local result::CUresult = cuMemAlloc(device_ptr_array, bytesize)
@@ -331,6 +339,81 @@ function cuMemAlloc(bytesize::Csize_t)::CUdeviceptr
 end
 
 cuMemAlloc(bytesize::Integer) = cuMemAlloc(Csize_t(bytesize))
+
+function cuMemAllocPitch(WidthInBytes::Csize_t, Height::Csize_t, ElementSizeBytes::Cuint)::Tuple{CUdeviceptr, Csize_t}
+    local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+    local pitch_array::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local result::CUresult = cuMemAllocPitch(dev_ptr_array, pitch_array, WidthInBytes, Height, ElementSizeBytes)
+    @assert (result == CUDA_SUCCESS) ("cuMemAllocPitch() error: " * cuGetErrorString(result))
+    return (pop!(dev_ptr_array), pop!(pitch_array))
+end
+
+cuMemAllocPitch(WidthInBytes::Integer, Height::Integer, ElementSizeBytes::Integer) = cuMemAllocPitch(Csize_t(WidthInBytes), Csize_t(Height), Cuint(ElementSizeBytes))
+
+function cuMemGetAddressRange(dptr::CUdeviceptr)::Tuple{CUdeviceptr, Csize_t}
+    local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+    local size_array::Array{Csize_t, 1} = zeros(Csize_t, 1)
+    local result::CUresult = cuMemGetAddressRange(dev_ptr_array, size_array, dptr)
+    @assert (result == CUDA_SUCCESS) ("cuMemGetAddressRange() error: " * cuGetErrorString(result))
+    return (pop!(dev_ptr_array), pop!(size_array))
+end
+
+function cuMemAllocHost(bytesize::Csize_t)::Ptr{Nothing}
+    local host_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+    local result::CUresult = cuMemAllocHost(host_ptr_array, bytesize)
+    @assert (result == CUDA_SUCCESS) ("cuMemAllocHost() error: " * cuGetErrorString(result))
+    return pop!(host_ptr_array)
+end
+
+cuMemAllocHost(bytesize::Integer) = cuMemAllocHost(Csize_t(bytesize))
+
+function cuMemHostAlloc(bytesize::Csize_t)::Ptr{Nothing}
+    local host_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+    local result::CUresult = cuMemHostAlloc(host_ptr_array, bytesize)
+    @assert (result == CUDA_SUCCESS) ("cuMemHostAlloc() error: " * cuGetErrorString(result))
+    return pop!(host_ptr_array)
+end
+
+cuMemHostAlloc(bytesize::Integer) = cuMemHostAlloc(Csize_t(bytesize))
+
+function cuMemHostGetDevicePointer(p::Ptr{Nothing})::CUdeviceptr
+    local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+    local result::CUresult = cuMemHostGetDevicePointer(dev_ptr_array, p, Cuint(0))
+    @assert (result == CUDA_SUCCESS) ("cuMemHostGetDevicePointer() error: " * cuGetErrorString(result))
+    return pop!(dev_ptr_array)
+end
+
+function cuMemHostGetFlags(p::Ptr{Nothing})::Cuint
+    local flags_array::Array{Cuint, 1} = zeros(Cuint, 1)
+    local result::CUresult = cuMemHostGetFlags(flags_array, p)
+    @assert (result == CUDA_SUCCESS) ("cuMemHostGetFlags() error: " * cuGetErrorString(result))
+    return pop!(flags_array)
+end
+
+function cuMemAllocManaged(bytesize::Csize_t, flags::CUmemAttach_flags)::CUdeviceptr
+    local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+    local result::CUresult = cuMemAllocManaged(dev_ptr_array, bytesize, flags)
+    @assert (result == CUDA_SUCCESS) ("cuMemAllocManaged() error: " * cuGetErrorString(result))
+    return pop!(dev_ptr_array)
+end
+
+cuMemAllocManaged(bytesize::Integer, flags::CUmemAttach_flags) = cuMemAllocManaged(Csize_t(bytesize), flags)
+
+function cuDeviceGetByPCIBusId(pciBusId::Array{UInt8, 1})::CUdevice
+    local dev_array::Array{CUdevice, 1} = zeros(CUdevice, 1)
+    local result::CUresult = cuDeviceGetByPCIBusId(dev_array, pciBusId)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceGetByPCIBusId() error: " * cuGetErrorString(result))
+    return pop!(dev_array)
+end
+
+cuDeviceGetByPCIBusId(pciBusId::String) = cuDeviceGetByPCIBusId(map(UInt8, collect(pciBusId)))
+
+function cuDeviceGetPCIBusId(dev::CUdevice)::String
+    local pcibus_array::Array{UInt8, 1} = zeros(UInt8, 100)
+    local result::CUresult = cuDeviceGetPCIBusId(pcibus_array, Cint(100), dev)
+    @assert (result == CUDA_SUCCESS) ("cuDeviceGetPCIBusId() error: " * cuGetErrorString(result))
+    return unsafe_string(Base.unsafe_convert(Ptr{UInt8}, pcibus_array))
+end
 
 function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Array{T}, srcOffset::Csize_t, bytesize::Csize_t)::Nothing where T
     local result::CUresult = cuMemcpyHtoD(dstDevice + dstOffset, Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, srcHost)) + srcOffset, bytesize)
