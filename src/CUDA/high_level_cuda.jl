@@ -819,5 +819,44 @@ function cuStreamWaitEvent(hStream::CUstream, hEvent::CUevent)::Nothing
     nothing
 end
 
+# occupancy functions
+function cuOccupancyMaxActiveBlocksPerMultiprocessor(func::CUfunction, blockSize::Cint, dynamicSMemSize::Csize_t)::Cint
+    local numblocks_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuOccupancyMaxActiveBlocksPerMultiprocessor(numblocks_array, func, blockSize, dynamicSMemSize)
+    @assert (result == CUDA_SUCCESS) ("cuOccupancyMaxActiveBlocksPerMultiprocessor() error: " * cuGetErrorString(result))
+    return pop!(numblocks_array)
+end
+
+cuOccupancyMaxActiveBlocksPerMultiprocessor(func::CUfunction, blockSize::Integer, dynamicSMemSize::Integer) = cuOccupancyMaxActiveBlocksPerMultiprocessor(func::CUfunction, Cint(blockSize), Csize_t(dynamicSMemSize))
+
+function cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(func::CUfunction, blockSize::Cint, dynamicSMemSize::Csize_t, flags::CUoccupancy_flags)::Cint
+    local numblocks_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(numblocks_array, func, blockSize, dynamicSMemSize, flags)
+    @assert (result == CUDA_SUCCESS) ("cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags() error: " * cuGetErrorString(result))
+    return pop!(numblocks_array)
+end
+
+cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(func::CUfunction, blockSize::Integer, dynamicSMemSize::Integer, flags::CUoccupancy_flags) = cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(func, Cint(blockSize), Csize_t(dynamicSMemSize), flags)
+
+function cuOccupancyMaxPotentialBlockSize(func::CUfunction, blockSizeToDynamicSMemSize::CUoccupancyB2DSize, dynamicSMemSize::Csize_t, blockSizeLimit::Cint)::Tuple{Cint, Cint}
+    local mgs_array::Array{Cint, 1} = zeros(Cint, 1)
+    local bs_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuOccupancyMaxPotentialBlockSize(mgs_array, bs_array, func, blockSizeToDynamicSMemSize, dynamicSMemSize, blockSizeLimit)
+    @assert (result == CUDA_SUCCESS) ("cuOccupancyMaxPotentialBlockSize() error: " * cuGetErrorString(result))
+    return (pop!(mgs_array), pop!(bs_array))
+end
+
+cuOccupancyMaxPotentialBlockSize(func::CUfunction, blockSizeToDynamicSMemSize::CUoccupancyB2DSize, dynamicSMemSize::Integer, blockSizeLimit::Integer) = cuOccupancyMaxPotentialBlockSize(func, blockSizeToDynamicSMemSize, Csize_t(dynamicSMemSize), Cint(blockSizeLimit))
+
+function cuOccupancyMaxPotentialBlockSizeWithFlags(func::CUfunction, blockSizeToDynamicSMemSize::CUoccupancyB2DSize, dynamicSMemSize::Csize_t, blockSizeLimit::Cint, flags::CUoccupancy_flags)::Tuple{Cint, Cint}
+    local mgs_array::Array{Cint, 1} = zeros(Cint, 1)
+    local bs_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuOccupancyMaxPotentialBlockSizeWithFlags(mgs_array, bs_array, func, blockSizeToDynamicSMemSize, dynamicSMemSize, blockSizeLimit, flags)
+    @assert (result == CUDA_SUCCESS) ("cuOccupancyMaxPotentialBlockSizeWithFlags() error: " * cuGetErrorString(result))
+    return (pop!(mgs_array), pop!(bs_array))
+end
+
+cuOccupancyMaxPotentialBlockSizeWithFlags(func::CUfunction, blockSizeToDynamicSMemSize::CUoccupancyB2DSize, dynamicSMemSize::Integer, blockSizeLimit::Integer, flags::CUoccupancy_flags) = cuOccupancyMaxPotentialBlockSizeWithFlags(func, blockSizeToDynamicSMemSize, Csize_t(dynamicSMemSize), Cint(blockSizeLimit), flags)
+
 
 
