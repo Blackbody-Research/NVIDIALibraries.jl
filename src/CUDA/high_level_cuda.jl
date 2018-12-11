@@ -637,3 +637,139 @@ else
         end
     end
 end
+
+function cuMemRangeGetAttribute(dataSize::Csize_t, attribute::CUmem_range_attribute, devPtr::CUdeviceptr, count::Csize_t)
+    local result::CUresult
+
+    if (attribute == CU_MEM_RANGE_ATTRIBUTE_READ_MOSTLY)
+        @assert (dataSize == 4) ("cuMemRangeGetAttribute() error: 'dataSize' must be 4 when CU_MEM_RANGE_ATTRIBUTE_READ_MOSTLY is specified!")
+        local read_mostly_array::Array{Cint, 1} = zeros(Cint, 1)
+        result = cuMemRangeGetAttribute(Ptr{Nothing}(Base.unsafe_convert(Ptr{Cint}, read_mostly_array)), dataSize, attribute, devPtr, count)
+        @assert (result == CUDA_SUCCESS) ("cuMemRangeGetAttribute() error: " * cuGetErrorString(result))
+        return pop!(read_mostly_array)
+    elseif (attribute == CU_MEM_RANGE_ATTRIBUTE_PREFERRED_LOCATION)
+        @assert (dataSize == 4) ("cuMemRangeGetAttribute() error: 'dataSize' must be 4 when CU_MEM_RANGE_ATTRIBUTE_PREFERRED_LOCATION is specified!")
+        local preferred_location_array::Array{Cint, 1} = zeros(Cint, 1)
+        result = cuMemRangeGetAttribute(Ptr{Nothing}(Base.unsafe_convert(Ptr{Cint}, preferred_location_array)), dataSize, attribute, devPtr, count)
+        @assert (result == CUDA_SUCCESS) ("cuMemRangeGetAttribute() error: " * cuGetErrorString(result))
+        return pop!(preferred_location_array)
+    elseif (attribute == CU_MEM_RANGE_ATTRIBUTE_ACCESSED_BY)
+        @assert ((dataSize > 0) && (dataSize % 4 == 0)) ("cuMemRangeGetAttribute() error: 'dataSize' must be a non-zero multiple of 4 when CU_MEM_RANGE_ATTRIBUTE_ACCESSED_BY is specified!")
+        local accessed_by_array::Array{Cint, 1} = zeros(Cint, Int(dataSize * 0.25))
+        result = cuMemRangeGetAttribute(Ptr{Nothing}(Base.unsafe_convert(Ptr{Cint}, accessed_by_array)), dataSize, attribute, devPtr, count)
+        @assert (result == CUDA_SUCCESS) ("cuMemRangeGetAttribute() error: " * cuGetErrorString(result))
+        return pop!(accessed_by_array)
+    elseif (attribute == CU_MEM_RANGE_ATTRIBUTE_LAST_PREFETCH_LOCATION)
+        @assert (dataSize == 4) ("cuMemRangeGetAttribute() error: 'dataSize' must be 4 when CU_MEM_RANGE_ATTRIBUTE_LAST_PREFETCH_LOCATION is specified!")
+        local last_prefetch_array::Array{Cint, 1} = zeros(Cint, 1)
+        result = cuMemRangeGetAttribute(Ptr{Nothing}(Base.unsafe_convert(Ptr{Cint}, last_prefetch_array)), dataSize, attribute, devPtr, count)
+        @assert (result == CUDA_SUCCESS) ("cuMemRangeGetAttribute() error: " * cuGetErrorString(result))
+        return pop!(last_prefetch_array)
+    else
+        error("cuMemRangeGetAttribute(): error: Found unexpected CUmem_range_attribute value, ", Int(attribute), ".")
+    end
+end
+
+cuMemRangeGetAttribute(dataSize::Integer, attribute::CUmem_range_attribute, devPtr::CUdeviceptr, count::Integer) = cuMemRangeGetAttribute(Csize_t(dataSize), attribute, devPtr, Csize_t(count))
+
+function cuMemRangeGetAttributes(dataSizes::Array{Csize_t, 1}, attributes::Array{CUmem_range_attribute, 1}, numAttributes::Csize_t, devPtr::CUdeviceptr, count::Csize_t)::Array{Array{Cint, 1}, 1}
+    @assert (length(dataSizes) == length(attributes)) ("cuMemRangeGetAttributes() error: The length of 'dataSizes' and 'attributes' don't match!")
+    local attributes_array::Array{Array{Cint, 1}, 1} = Array{Array{Cint, 1}, 1}()
+    
+    for (s, a) in zip(dataSizes, attributes)
+        if (a == CU_MEM_RANGE_ATTRIBUTE_READ_MOSTLY)
+            @assert (s == 4) ("cuMemRangeGetAttributes() error: The data size must be 4 when CU_MEM_RANGE_ATTRIBUTE_READ_MOSTLY is specified, got " * string(s) * "!")
+            push!(attributes_array, zeros(Cint, 1))
+        elseif (a == CU_MEM_RANGE_ATTRIBUTE_PREFERRED_LOCATION)
+            @assert (s == 4) ("cuMemRangeGetAttributes() error: The data size must be 4 when CU_MEM_RANGE_ATTRIBUTE_PREFERRED_LOCATION is specified, got " * string(s) * "!")
+            push!(attributes_array, zeros(Cint, 1))
+        elseif (a == CU_MEM_RANGE_ATTRIBUTE_ACCESSED_BY)
+            @assert ((s > 0) && (s % 4 == 0)) ("cuMemRangeGetAttributes() error: The data size must be a non-zero multiple of 4 when CU_MEM_RANGE_ATTRIBUTE_ACCESSED_BY is specified, got " * string(s) * "!")
+            push!(attributes_array, zeros(Cint, Int(a * 0.25)))
+        elseif (a == CU_MEM_RANGE_ATTRIBUTE_LAST_PREFETCH_LOCATION)
+            @assert (s == 4) ("cuMemRangeGetAttributes() error: The data size must be 4 when CU_MEM_RANGE_ATTRIBUTE_LAST_PREFETCH_LOCATION is specified, got " * string(s) * "!")
+            push!(attributes_array, zeros(Cint, 1))
+        else
+            error("cuMemRangeGetAttributes(): error: Found unexpected CUmem_range_attribute value, ", Int(a), ".")
+        end
+    end
+
+    local attributes_ptr_array::Array{Ptr{Nothing}, 1} = map(pointer, attributes_array)
+
+    local result::CUresult = cuMemRangeGetAttributes(attributes_ptr_array, dataSizes, attributes, numAttributes, devPtr, count)
+    @assert (result == CUDA_SUCCESS) ("cuMemRangeGetAttributes() error: " * cuGetErrorString(result))
+    return attributes_array
+end
+
+cuMemRangeGetAttributes(dataSizes::Array{Csize_t, 1}, attributes::Array{CUmem_range_attribute, 1}, numAttributes::Integer, devPtr::CUdeviceptr, count::Integer) = cuMemRangeGetAttributes(dataSizes, attributes, Csize_t(numAttributes), devPtr, Csize_t(count))
+
+if (CUDA_VERSION >= 9020)
+    # CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL available since CUDA 9.2
+    function cuPointerGetAttributes(numAttributes::Cuint, attributes::Array{CUpointer_attribute, 1}, ptr::CUdeviceptr)::Array{Vector, 1}
+        local data_array::Array{Vector, 1} = Array{Vector, 1}()
+    
+        for a in attributes
+            if (a == CU_POINTER_ATTRIBUTE_CONTEXT)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_MEMORY_TYPE)
+                push!(data_array, zeros(Cuint, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_DEVICE_POINTER)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_HOST_POINTER)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_P2P_TOKENS)
+                push!(data_array, zeros(CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_SYNC_MEMOPS)
+                push!(data_array, zeros(Bool, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_BUFFER_ID)
+                push!(data_array, zeros(Culonglong, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_IS_MANAGED)
+                push!(data_array, zeros(Bool, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL)
+                push!(data_array, zeros(CUdevice, 1))
+            else
+                error("cuPointerGetAttributes(): error: Found unexpected CUpointer_attribute value, ", Int(a), ".")
+            end
+        end
+    
+        local data_ptr_array::Array{Ptr{Nothing}, 1} = map(pointer, data_array)
+        local result::CUresult = cuPointerGetAttributes(numAttributes, attributes, data_ptr_array, ptr)
+        @assert (result == CUDA_SUCCESS) ("cuPointerGetAttributes() error: " * cuGetErrorString(result))
+        return data_array
+    end
+else
+    function cuPointerGetAttributes(numAttributes::Cuint, attributes::Array{CUpointer_attribute, 1}, ptr::CUdeviceptr)::Array{Vector, 1}
+        local data_array::Array{Vector, 1} = Array{Vector, 1}()
+    
+        for a in attributes
+            if (a == CU_POINTER_ATTRIBUTE_CONTEXT)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_MEMORY_TYPE)
+                push!(data_array, zeros(Cuint, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_DEVICE_POINTER)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_HOST_POINTER)
+                push!(data_array, [C_NULL])
+            elseif (a == CU_POINTER_ATTRIBUTE_P2P_TOKENS)
+                push!(data_array, zeros(CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_SYNC_MEMOPS)
+                push!(data_array, zeros(Bool, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_BUFFER_ID)
+                push!(data_array, zeros(Culonglong, 1))
+            elseif (a == CU_POINTER_ATTRIBUTE_IS_MANAGED)
+                push!(data_array, zeros(Bool, 1))
+            else
+                error("cuPointerGetAttributes(): error: Found unexpected CUpointer_attribute value, ", Int(a), ".")
+            end
+        end
+    
+        local data_ptr_array::Array{Ptr{Nothing}, 1} = map(pointer, data_array)
+        local result::CUresult = cuPointerGetAttributes(numAttributes, attributes, data_ptr_array, ptr)
+        @assert (result == CUDA_SUCCESS) ("cuPointerGetAttributes() error: " * cuGetErrorString(result))
+        return data_array
+    end
+end
+
+cuPointerGetAttributes(numAttributes::Integer, attributes::Array{CUpointer_attribute, 1}, ptr::CUdeviceptr) = cuPointerGetAttributes(Cuint(numAttributes), attributes, ptr)
+
+
