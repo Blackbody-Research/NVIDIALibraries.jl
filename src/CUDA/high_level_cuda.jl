@@ -415,6 +415,34 @@ function cuDeviceGetPCIBusId(dev::CUdevice)::String
     return unsafe_string(Base.unsafe_convert(Ptr{UInt8}, pcibus_array))
 end
 
+function cuIpcGetEventHandle(event::CUevent)::CUipcEventHandle
+    local handle_array::Array{CUipcEventHandle, 1} = zeros(CUipcEventHandle, 1)
+    local result::CUresult = cuIpcGetEventHandle(handle_array, event)
+    @assert (result == CUDA_SUCCESS) ("cuIpcGetEventHandle() error: " * cuGetErrorString(result))
+    return pop!(handle_array)
+end
+
+function cuIpcOpenEventHandle(handle::CUipcEventHandle)::CUevent
+    local event_array::Array{CUevent, 1} = [C_NULL]
+    local result::CUresult = cuIpcOpenEventHandle(event_array, handle)
+    @assert (result == CUDA_SUCCESS) ("cuIpcOpenEventHandle() error: " * cuGetErrorString(result))
+    return pop!(event_array)
+end
+
+function cuIpcGetMemHandle(dptr::CUdeviceptr)::CUipcMemHandle
+    local handle_array::Array{CUipcMemHandle, 1} = zeros(CUipcMemHandle, 1)
+    local result::CUresult = cuIpcGetMemHandle(handle_array, dptr)
+    @assert (result == CUDA_SUCCESS) ("cuIpcGetMemHandle() error: " * cuGetErrorString(result))
+    return pop!(handle_array)
+end
+
+function cuIpcOpenMemHandle(handle::CUipcMemHandle, Flags::CUipcMem_flags)::CUdeviceptr
+    local device_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+    local result::CUresult = cuIpcOpenMemHandle(device_ptr_array, handle, Flags)
+    @assert (result == CUDA_SUCCESS) ("cuIpcOpenMemHandle() error: " * cuGetErrorString(result))
+    return pop!(device_ptr_array)
+end
+
 function cuMemcpyHtoD(dstDevice::CUdeviceptr, dstOffset::Csize_t, srcHost::Array{T}, srcOffset::Csize_t, bytesize::Csize_t)::Nothing where T
     local result::CUresult = cuMemcpyHtoD(dstDevice + dstOffset, Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, srcHost)) + srcOffset, bytesize)
     @assert (result == CUDA_SUCCESS) ("cuMemcpyHtoD() error: " * cuGetErrorString(result))
@@ -453,3 +481,159 @@ end
 
 cuMemcpyDtoD(dstDevice::CUdeviceptr, dstOffset::Integer, srcDevice::CUdeviceptr, srcOffset::Integer, bytesize::Integer) = cuMemcpyDtoD(dstDevice, Csize_t(dstOffset), srcDevice, Csize_t(srcOffset), Csize_t(bytesize))
 
+function cuArrayCreate(pAllocateArray::CUDA_ARRAY_DESCRIPTOR)::CUarray
+    local handle_array::Array{CUarray, 1} = [C_NULL]
+    local allocatearray_array::Array{CUDA_ARRAY_DESCRIPTOR, 1} = [pAllocateArray]
+    local result::CUresult = cuArrayCreate(handle_array, allocatearray_array)
+    @assert (result == CUDA_SUCCESS) ("cuArrayCreate() error: " * cuGetErrorString(result))
+    return pop!(handle_array)
+end
+
+function cuArrayGetDescriptor(hArray::CUarray)::CUDA_ARRAY_DESCRIPTOR
+    local array_descriptor_array::Array{CUDA_ARRAY_DESCRIPTOR, 1} = zeros(CUDA_ARRAY_DESCRIPTOR, 1)
+    local result::CUresult = cuArrayGetDescriptor(array_descriptor_array, hArray)
+    @assert (result == CUDA_SUCCESS) ("cuArrayGetDescriptor() error: " * cuGetErrorString(result))
+    return pop!(array_descriptor_array)
+end
+
+function cuArray3DCreate(pAllocateArray::CUDA_ARRAY3D_DESCRIPTOR)::CUarray
+    local handle_array::Array{CUarray, 1} = [C_NULL]
+    local allocatearray_array::Array{CUDA_ARRAY3D_DESCRIPTOR, 1} = [pAllocateArray]
+    local result::CUresult = cuArray3DCreate(handle_array, allocatearray_array)
+    @assert (result == CUDA_SUCCESS) ("cuArray3DCreate() error: " * cuGetErrorString(result))
+    return pop!(handle_array)
+end
+
+function cuArray3DGetDescriptor(hArray::CUarray)::CUDA_ARRAY3D_DESCRIPTOR
+    local array3d_descriptor_array::Array{CUDA_ARRAY3D_DESCRIPTOR, 1} = zeros(CUDA_ARRAY3D_DESCRIPTOR, 1)
+    local result::CUresult = cuArray3DGetDescriptor(array3d_descriptor_array, hArray)
+    @assert (result == CUDA_SUCCESS) ("cuArray3DGetDescriptor() error: " * cuGetErrorString(result))
+    return pop!(array3d_descriptor_array)
+end
+
+function cuMipmappedArrayCreate(pMipmappedArrayDesc::CUDA_ARRAY3D_DESCRIPTOR, numMipmapLevels::Cuint)::CUmipmappedArray
+    local mipmapped_array::Array{CUmipmappedArray, 1} = [C_NULL]
+    local mm_array_desc::Array{CUDA_ARRAY3D_DESCRIPTOR, 1} = [pMipmappedArrayDesc]
+    local result::CUresult = cuMipmappedArrayCreate(mipmapped_array, mm_array_desc, numMipmapLevels)
+    @assert (result == CUDA_SUCCESS) ("cuMipmappedArrayCreate() error: " * cuGetErrorString(result))
+    return pop!(mipmapped_array)
+end
+
+cuMipmappedArrayCreate(pMipmappedArrayDesc::CUDA_ARRAY3D_DESCRIPTOR, numMipmapLevels::Integer) = cuMipmappedArrayCreate(pMipmappedArrayDesc, Cuint(numMipmapLevels))
+
+function cuMipmappedArrayGetLevel(hMipmappedArray::CUmipmappedArray, level::Cuint)::CUarray
+    local mm_level_array::Array{CUarray, 1} = [C_NULL]
+    local result::CUresult = cuMipmappedArrayGetLevel(mm_level_array, hMipmappedArray, level)
+    @assert (result == CUDA_SUCCESS) ("cuMipmappedArrayGetLevel() error: " * cuGetErrorString(result))
+    return pop!(mm_level_array)
+end
+
+cuMipmappedArrayGetLevel(hMipmappedArray::CUmipmappedArray, level::Integer) = cuMipmappedArrayGetLevel(hMipmappedArray, Cuint(level))
+
+# unified addressing functions
+if (CUDA_VERSION >= 9020)
+    # CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL available since CUDA 9.2
+    function cuPointerGetAttribute(attribute::CUpointer_attribute, ptr::CUdeviceptr)
+        local result::CUresult
+        if (attribute == CU_POINTER_ATTRIBUTE_CONTEXT)
+            local ctx_array::Array{CUcontext, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, ctx_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(ctx_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_MEMORY_TYPE)
+            local memtype_array::Array{Cuint, 1} = zeros(Cuint, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, memtype_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(memtype_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_DEVICE_POINTER)
+            local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, dev_ptr_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(dev_ptr_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_HOST_POINTER)
+            local host_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, host_ptr_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(host_ptr_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_P2P_TOKENS)
+            local p2p_tokens_array::Array{CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1} = zeros(CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, p2p_tokens_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(p2p_tokens_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_SYNC_MEMOPS)
+            local syncmem_array::Array{Bool, 1} = zeros(Bool, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, syncmem_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(syncmem_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_BUFFER_ID)
+            local bufferid_array::Array{Culonglong, 1} = zeros(Culonglong, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, bufferid_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(bufferid_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_IS_MANAGED)
+            local is_managed_array::Array{Bool, 1} = zeros(Bool, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, is_managed_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(is_managed_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL)
+            local dev_ordinal_array::Array{CUdevice, 1} = zeros(CUdevice, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, dev_ordinal_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(dev_ordinal_array)
+        else
+            error("cuPointerGetAttribute(): error: Found unexpected CUpointer_attribute value, ", Int(attribute), ".")
+        end
+    end
+else
+    function cuPointerGetAttribute(attribute::CUpointer_attribute, ptr::CUdeviceptr)
+        local result::CUresult
+        if (attribute == CU_POINTER_ATTRIBUTE_CONTEXT)
+            local ctx_array::Array{CUcontext, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, ctx_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(ctx_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_MEMORY_TYPE)
+            local memtype_array::Array{Cuint, 1} = zeros(Cuint, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, memtype_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(memtype_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_DEVICE_POINTER)
+            local dev_ptr_array::Array{CUdeviceptr, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, dev_ptr_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(dev_ptr_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_HOST_POINTER)
+            local host_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, host_ptr_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(host_ptr_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_P2P_TOKENS)
+            local p2p_tokens_array::Array{CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1} = zeros(CUDA_POINTER_ATTRIBUTE_P2P_TOKENS, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, p2p_tokens_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(p2p_tokens_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_SYNC_MEMOPS)
+            local syncmem_array::Array{Bool, 1} = zeros(Bool, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, syncmem_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(syncmem_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_BUFFER_ID)
+            local bufferid_array::Array{Culonglong, 1} = zeros(Culonglong, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, bufferid_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(bufferid_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_IS_MANAGED)
+            local is_managed_array::Array{Bool, 1} = zeros(Bool, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, is_managed_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(is_managed_array)
+        elseif (attribute == CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL)
+            local dev_ordinal_array::Array{CUdevice, 1} = zeros(CUdevice, 1)
+            result = cuPointerGetAttribute(Base.unsafe_convert(Ptr{Nothing}, dev_ordinal_array), attribute, ptr)
+            @assert (result == CUDA_SUCCESS) ("cuPointerGetAttribute() error: " * cuGetErrorString(result))
+            return pop!(dev_ordinal_array)
+        else
+            error("cuPointerGetAttribute(): error: Found unexpected CUpointer_attribute value, ", Int(attribute), ".")
+        end
+    end
+end
