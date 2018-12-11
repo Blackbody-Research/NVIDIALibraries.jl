@@ -819,6 +819,14 @@ function cuStreamWaitEvent(hStream::CUstream, hEvent::CUevent)::Nothing
     nothing
 end
 
+# execution control functions
+function cuFuncGetAttribute(attrib::CUfunction_attribute, hfunc::CUfunction)::Cint
+    local attribute_value_array::Array{Cint, 1} = zeros(Cint, 1)
+    local result::CUresult = cuFuncGetAttribute(attribute_value_array, attrib, hfunc)
+    @assert (result == CUDA_SUCCESS) ("cuFuncGetAttribute() error: " * cuGetErrorString(result))
+    return pop!(attribute_value_array)
+end
+
 # occupancy functions
 function cuOccupancyMaxActiveBlocksPerMultiprocessor(func::CUfunction, blockSize::Cint, dynamicSMemSize::Csize_t)::Cint
     local numblocks_array::Array{Cint, 1} = zeros(Cint, 1)
