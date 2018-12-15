@@ -344,7 +344,7 @@ function cudaEventRecord(event::cudaEvent_t, stream::cudaStream_t)::cudaError_t
 end
 
 function cudaEventRecord_ptsz(event::cudaEvent_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaEventRecord, libcudart), cudaError_t, (cudaEvent_t, cudaStream_t,), event, stream)
+    return ccall((:cudaEventRecord_ptsz, libcudart), cudaError_t, (cudaEvent_t, cudaStream_t,), event, stream)
 end
 
 function cudaEventQuery(event::cudaEvent_t)::cudaError_t

@@ -929,10 +929,19 @@ struct cudaLaunchParams
     stream::cudaStream_t
 end
 
+Base.zero(::Type{cudaLaunchParams}) = cudaLaunchParams(
+    C_NULL,
+    zero(dim3),
+    zero(dim3),
+    Ptr{Ptr{Nothing}}(C_NULL),
+    Csize_t(0),
+    cudaStream_t(C_NULL))
+Base.zero(x::cudaLaunchParams) = zero(typeof(x))
+
 # type association for CUDA runtime stream callback function
 const cudaStreamCallback_t = Ptr{Nothing}
 
-# CUDA runtime surface data types
+# CUDA runtime surface data types from 'cuda_surface_types.h'
 
 const cudaSurfaceType1D             = 0x01
 const cudaSurfaceType2D             = 0x02
@@ -963,7 +972,7 @@ Base.zero(x::surfaceReference) = zero(typeof(x))
 
 const cudaSurfaceObject_t = Culonglong
 
-# CUDA runtime texture data types
+# CUDA runtime texture data types from 'cuda_texture_types.h'
 
 const cudaTextureType1D             = 0x01
 const cudaTextureType2D             = 0x02
