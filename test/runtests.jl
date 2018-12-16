@@ -27,13 +27,13 @@ println("CUDA driver version: ", c_int_array[1])
 cuda_driver_version = c_int_array[1]
 
 # run CUDA library driver tests corresponding to the installed CUDA driver version
-include(@sprintf("%i.%i",
-                    Int(floor(0.01 * cuda_driver_version)),
-                    Int(floor(0.1 * (cuda_driver_version % 1000))))
+include((@sprintf("%i.%i",
+                    Int(floor(0.001 * cuda_driver_version)),
+                    Int(floor(0.1 * (cuda_driver_version % 1000)))))
         * "/libcuda_"
-        * @sprintf("%i.%i",
-                    Int(floor(0.01 * cuda_driver_version)),
-                    Int(floor(0.1 * (cuda_driver_version % 1000))))
+        * (@sprintf("%i.%i",
+                    Int(floor(0.001 * cuda_driver_version)),
+                    Int(floor(0.1 * (cuda_driver_version % 1000)))))
         * "_function_tests.jl")
 
 let
