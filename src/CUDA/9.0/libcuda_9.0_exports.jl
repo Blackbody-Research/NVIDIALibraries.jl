@@ -19,6 +19,7 @@ export
     # constants
     cuuint32_t,
     cuuint64_t,
+    CUDA_VERSION,
     CUdeviceptr,
     CUdevice,
     CUcontext,

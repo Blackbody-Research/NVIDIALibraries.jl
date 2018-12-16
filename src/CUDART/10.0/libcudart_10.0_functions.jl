@@ -1,5 +1,5 @@
 #=*
-* CUDA runtime API v8.0 functions
+* CUDA runtime API v10.0 functions
 *
 * Copyright (C) 2018 Qijia (Michael) Jin
 * This program is free software; you can redistribute it and/or
@@ -271,14 +271,6 @@ function cudaStreamGetPriority(hStream::cudaStream_t, priority::Ptr{Cint})::cuda
     return ccall((:cudaStreamGetPriority, libcudart), cudaError_t, (cudaStream_t, Ptr{Cint},), hStream, priority)
 end
 
-function cudaStreamGetPriority_ptsz(hStream::cudaStream_t, priority::Array{Cint, 1})::cudaError_t
-    return ccall((:cudaStreamGetPriority_ptsz, libcudart), cudaError_t, (cudaStream_t, Ref{Cint},), hStream, Base.cconvert(Ref{Cint}, priority))
-end
-
-function cudaStreamGetPriority_ptsz(hStream::cudaStream_t, priority::Ptr{Cint})::cudaError_t
-    return ccall((:cudaStreamGetPriority_ptsz, libcudart), cudaError_t, (cudaStream_t, Ptr{Cint},), hStream, priority)
-end
-
 function cudaStreamGetFlags(hStream::cudaStream_t, flags::Array{Cuint, 1})::cudaError_t
     return ccall((:cudaStreamGetFlags, libcudart), cudaError_t, (cudaStream_t, Ref{Cuint},), hStream, Base.cconvert(Ref{Cuint}, flags))
 end
@@ -287,24 +279,12 @@ function cudaStreamGetFlags(hStream::cudaStream_t, flags::Ptr{Cuint})::cudaError
     return ccall((:cudaStreamGetFlags, libcudart), cudaError_t, (cudaStream_t, Ptr{Cuint},), hStream, flags)
 end
 
-function cudaStreamGetFlags_ptsz(hStream::cudaStream_t, flags::Array{Cuint, 1})::cudaError_t
-    return ccall((:cudaStreamGetFlags_ptsz, libcudart), cudaError_t, (cudaStream_t, Ref{Cuint},), hStream, Base.cconvert(Ref{Cuint}, flags))
-end
-
-function cudaStreamGetFlags_ptsz(hStream::cudaStream_t, flags::Ptr{Cuint})::cudaError_t
-    return ccall((:cudaStreamGetFlags_ptsz, libcudart), cudaError_t, (cudaStream_t, Ptr{Cuint},), hStream, flags)
-end
-
 function cudaStreamDestroy(stream::cudaStream_t)::cudaError_t
     return ccall((:cudaStreamDestroy, libcudart), cudaError_t, (cudaStream_t,), stream)
 end
 
 function cudaStreamWaitEvent(stream::cudaStream_t, event::cudaEvent_t, flags::Cuint)::cudaError_t
     return ccall((:cudaStreamWaitEvent, libcudart), cudaError_t, (cudaStream_t, cudaEvent_t, Cuint,), stream, event, flags)
-end
-
-function cudaStreamWaitEvent_ptsz(stream::cudaStream_t, event::cudaEvent_t, flags::Cuint)::cudaError_t
-    return ccall((:cudaStreamWaitEvent_ptsz, libcudart), cudaError_t, (cudaStream_t, cudaEvent_t, Cuint,), stream, event, flags)
 end
 
 function cudaStreamAddCallback(stream::cudaStream_t, callback::cudaStreamCallback_t, userData::Ptr{Cvoid}, flags::Cuint)::cudaError_t
@@ -323,6 +303,26 @@ function cudaStreamAttachMemAsync(stream::cudaStream_t, devPtr::Ptr{Cvoid}, leng
     return ccall((:cudaStreamAttachMemAsync, libcudart), cudaError_t, (cudaStream_t, Ptr{Cvoid}, Csize_t, Cuint,), stream, devPtr, length, flags)
 end
 
+function cudaStreamBeginCapture(stream::cudaStream_t)::cudaError_t
+    return ccall((:cudaStreamBeginCapture, libcudart), cudaError_t, (cudaStream_t,), stream)
+end
+
+function cudaStreamEndCapture(stream::cudaStream_t, pGraph::Array{cudaGraph_t, 1})::cudaError_t
+    return ccall((:cudaStreamEndCapture, libcudart), cudaError_t, (cudaStream_t, Ref{cudaGraph_t},), stream, Base.cconvert(Ref{cudaGraph_t}, pGraph))
+end
+
+function cudaStreamEndCapture(stream::cudaStream_t, pGraph::Ptr{cudaGraph_t})::cudaError_t
+    return ccall((:cudaStreamEndCapture, libcudart), cudaError_t, (cudaStream_t, Ptr{cudaGraph_t},), stream, pGraph)
+end
+
+function cudaStreamIsCapturing(stream::cudaStream_t, pCaptureStatus::Array{Cuint, 1})::cudaError_t
+    return ccall((:cudaStreamIsCapturing, libcudart), cudaError_t, (cudaStream_t, Ref{Cuint},), stream, Base.cconvert(Ref{Cuint}, pCaptureStatus))
+end
+
+function cudaStreamIsCapturing(stream::cudaStream_t, pCaptureStatus::Ptr{Cuint})::cudaError_t
+    return ccall((:cudaStreamIsCapturing, libcudart), cudaError_t, (cudaStream_t, Ptr{Cuint},), stream, pCaptureStatus)
+end
+
 function cudaEventCreate(event::Array{cudaEvent_t, 1})::cudaError_t
     return ccall((:cudaEventCreate, libcudart), cudaError_t, (Ref{cudaEvent_t},), Base.cconvert(Ref{cudaEvent_t}, event))
 end
@@ -339,12 +339,8 @@ function cudaEventCreateWithFlags(event::Ptr{cudaEvent_t}, flags::Cuint)::cudaEr
     return ccall((:cudaEventCreateWithFlags, libcudart), cudaError_t, (Ptr{cudaEvent_t}, Cuint,), event, flags)
 end
 
-function cudaEventRecord(event::cudaEvent_t, stream::cudaStream_t)::cudaError_t
+function cudaEventRecord(event::cudaEvent_t, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaEventRecord, libcudart), cudaError_t, (cudaEvent_t, cudaStream_t,), event, stream)
-end
-
-function cudaEventRecord_ptsz(event::cudaEvent_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaEventRecord_ptsz, libcudart), cudaError_t, (cudaEvent_t, cudaStream_t,), event, stream)
 end
 
 function cudaEventQuery(event::cudaEvent_t)::cudaError_t
@@ -359,12 +355,68 @@ function cudaEventDestroy(event::cudaEvent_t)::cudaError_t
     return ccall((:cudaEventDestroy, libcudart), cudaError_t, (cudaEvent_t,), event)
 end
 
-function cudaEventElapsedTime(ms::Array{Cfloat, 1}, event_start::cudaEvent_t, event_end::cudaEvent_t)::cudaError_t
-    return ccall((:cudaEventElapsedTime, libcudart), cudaError_t, (Ref{Cfloat}, cudaEvent_t, cudaEvent_t,), Base.cconvert(Ref{Cfloat}, ms), event_start, event_end)
+function cudaEventElapsedTime(ms::Array{Cfloat, 1}, start::cudaEvent_t, event_end::cudaEvent_t)::cudaError_t
+    return ccall((:cudaEventElapsedTime, libcudart), cudaError_t, (Ref{Cfloat}, cudaEvent_t, cudaEvent_t,), Base.cconvert(Ref{Cfloat}, ms), start, event_end)
 end
 
-function cudaEventElapsedTime(ms::Ptr{Cfloat}, event_start::cudaEvent_t, event_end::cudaEvent_t)::cudaError_t
-    return ccall((:cudaEventElapsedTime, libcudart), cudaError_t, (Ptr{Cfloat}, cudaEvent_t, cudaEvent_t,), ms, event_start, event_end)
+function cudaEventElapsedTime(ms::Ptr{Cfloat}, start::cudaEvent_t, event_end::cudaEvent_t)::cudaError_t
+    return ccall((:cudaEventElapsedTime, libcudart), cudaError_t, (Ptr{Cfloat}, cudaEvent_t, cudaEvent_t,), ms, start, event_end)
+end
+
+function cudaImportExternalMemory(extMem_out::Array{cudaExternalMemory_t, 1}, memHandleDesc::Array{cudaExternalMemoryHandleDesc, 1})::cudaError_t
+    return ccall((:cudaImportExternalMemory, libcudart), cudaError_t, (Ref{cudaExternalMemory_t}, Ref{cudaExternalMemoryHandleDesc},), Base.cconvert(Ref{cudaExternalMemory_t}, extMem_out), Base.cconvert(Ref{cudaExternalMemoryHandleDesc}, memHandleDesc))
+end
+
+function cudaImportExternalMemory(extMem_out::Ptr{cudaExternalMemory_t}, memHandleDesc::Ptr{cudaExternalMemoryHandleDesc})::cudaError_t
+    return ccall((:cudaImportExternalMemory, libcudart), cudaError_t, (Ptr{cudaExternalMemory_t}, Ptr{cudaExternalMemoryHandleDesc},), extMem_out, memHandleDesc)
+end
+
+function cudaExternalMemoryGetMappedBuffer(devPtr::Array{Ptr{Cvoid}, 1}, extMem::cudaExternalMemory_t, bufferDesc::Array{cudaExternalMemoryBufferDesc, 1})::cudaError_t
+    return ccall((:cudaExternalMemoryGetMappedBuffer, libcudart), cudaError_t, (Ref{Ptr{Cvoid}}, cudaExternalMemory_t, Ref{cudaExternalMemoryBufferDesc},), Base.cconvert(Ref{Ptr{Cvoid}}, devPtr), extMem, Base.cconvert(Ref{cudaExternalMemoryBufferDesc}, bufferDesc))
+end
+
+function cudaExternalMemoryGetMappedBuffer(devPtr::Ptr{Ptr{Cvoid}}, extMem::cudaExternalMemory_t, bufferDesc::Ptr{cudaExternalMemoryBufferDesc})::cudaError_t
+    return ccall((:cudaExternalMemoryGetMappedBuffer, libcudart), cudaError_t, (Ptr{Ptr{Cvoid}}, cudaExternalMemory_t, Ptr{cudaExternalMemoryBufferDesc},), devPtr, extMem, bufferDesc)
+end
+
+function cudaExternalMemoryGetMappedMipmappedArray(mipmap::Array{cudaMipmappedArray_t, 1}, extMem::cudaExternalMemory_t, mipmapDesc::Array{cudaExternalMemoryMipmappedArrayDesc, 1})::cudaError_t
+    return ccall((:cudaExternalMemoryGetMappedMipmappedArray, libcudart), cudaError_t, (Ref{cudaMipmappedArray_t}, cudaExternalMemory_t, Ref{cudaExternalMemoryMipmappedArrayDesc},), Base.cconvert(Ref{cudaMipmappedArray_t}, mipmap), extMem, Base.cconvert(Ref{cudaExternalMemoryMipmappedArrayDesc}, mipmapDesc))
+end
+
+function cudaExternalMemoryGetMappedMipmappedArray(mipmap::Ptr{cudaMipmappedArray_t}, extMem::cudaExternalMemory_t, mipmapDesc::Ptr{cudaExternalMemoryMipmappedArrayDesc})::cudaError_t
+    return ccall((:cudaExternalMemoryGetMappedMipmappedArray, libcudart), cudaError_t, (Ptr{cudaMipmappedArray_t}, cudaExternalMemory_t, Ptr{cudaExternalMemoryMipmappedArrayDesc},), mipmap, extMem, mipmapDesc)
+end
+
+function cudaDestroyExternalMemory(extMem::cudaExternalMemory_t)::cudaError_t
+    return ccall((:cudaDestroyExternalMemory, libcudart), cudaError_t, (cudaExternalMemory_t,), extMem)
+end
+
+function cudaImportExternalSemaphore(extSem_out::Array{cudaExternalSemaphore_t, 1}, semHandleDesc::Array{cudaExternalSemaphoreHandleDesc, 1})::cudaError_t
+    return ccall((:cudaImportExternalSemaphore, libcudart), cudaError_t, (Ref{cudaExternalSemaphore_t}, Ref{cudaExternalSemaphoreHandleDesc},), Base.cconvert(Ref{cudaExternalSemaphore_t}, extSem_out), Base.cconvert(Ref{cudaExternalSemaphoreHandleDesc}, semHandleDesc))
+end
+
+function cudaImportExternalSemaphore(extSem_out::Ptr{cudaExternalSemaphore_t}, semHandleDesc::Ptr{cudaExternalSemaphoreHandleDesc})::cudaError_t
+    return ccall((:cudaImportExternalSemaphore, libcudart), cudaError_t, (Ptr{cudaExternalSemaphore_t}, Ptr{cudaExternalSemaphoreHandleDesc},), extSem_out, semHandleDesc)
+end
+
+function cudaSignalExternalSemaphoresAsync(extSemArray::Array{cudaExternalSemaphore_t, 1}, paramsArray::Array{cudaExternalSemaphoreSignalParams, 1}, numExtSems::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
+    return ccall((:cudaSignalExternalSemaphoresAsync, libcudart), cudaError_t, (Ref{cudaExternalSemaphore_t}, Ref{cudaExternalSemaphoreSignalParams}, Cuint, cudaStream_t,), Base.cconvert(Ref{cudaExternalSemaphore_t}, extSemArray), Base.cconvert(Ref{cudaExternalSemaphoreSignalParams}, paramsArray), numExtSems, stream)
+end
+
+function cudaSignalExternalSemaphoresAsync(extSemArray::Ptr{cudaExternalSemaphore_t}, paramsArray::Ptr{cudaExternalSemaphoreSignalParams}, numExtSems::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
+    return ccall((:cudaSignalExternalSemaphoresAsync, libcudart), cudaError_t, (Ptr{cudaExternalSemaphore_t}, Ptr{cudaExternalSemaphoreSignalParams}, Cuint, cudaStream_t,), extSemArray, paramsArray, numExtSems, stream)
+end
+
+function cudaWaitExternalSemaphoresAsync(extSemArray::Array{cudaExternalSemaphore_t, 1}, paramsArray::Array{cudaExternalSemaphoreWaitParams, 1}, numExtSems::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
+    return ccall((:cudaWaitExternalSemaphoresAsync, libcudart), cudaError_t, (Ref{cudaExternalSemaphore_t}, Ref{cudaExternalSemaphoreWaitParams}, Cuint, cudaStream_t,), Base.cconvert(Ref{cudaExternalSemaphore_t}, extSemArray), Base.cconvert(Ref{cudaExternalSemaphoreWaitParams}, paramsArray), numExtSems, stream)
+end
+
+function cudaWaitExternalSemaphoresAsync(extSemArray::Ptr{cudaExternalSemaphore_t}, paramsArray::Ptr{cudaExternalSemaphoreWaitParams}, numExtSems::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
+    return ccall((:cudaWaitExternalSemaphoresAsync, libcudart), cudaError_t, (Ptr{cudaExternalSemaphore_t}, Ptr{cudaExternalSemaphoreWaitParams}, Cuint, cudaStream_t,), extSemArray, paramsArray, numExtSems, stream)
+end
+
+function cudaDestroyExternalSemaphore(extSem::cudaExternalSemaphore_t)::cudaError_t
+    return ccall((:cudaDestroyExternalSemaphore, libcudart), cudaError_t, (cudaExternalSemaphore_t,), extSem)
 end
 
 function cudaLaunchKernel(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args::Array{Ptr{Cvoid}, 1}, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
@@ -375,12 +427,20 @@ function cudaLaunchKernel(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args:
     return ccall((:cudaLaunchKernel, libcudart), cudaError_t, (Ptr{Cvoid}, dim3, dim3, Ptr{Ptr{Cvoid}}, Csize_t, cudaStream_t,), func, gridDim, blockDim, args, sharedMem, stream)
 end
 
-function cudaLaunchKernel_ptsz(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args::Array{Ptr{Cvoid}, 1}, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaLaunchKernel_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, dim3, dim3, Ref{Ptr{Cvoid}}, Csize_t, cudaStream_t,), func, gridDim, blockDim, Base.cconvert(Ref{Ptr{Cvoid}}, args), sharedMem, stream)
+function cudaLaunchCooperativeKernel(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args::Array{Ptr{Cvoid}, 1}, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
+    return ccall((:cudaLaunchCooperativeKernel, libcudart), cudaError_t, (Ptr{Cvoid}, dim3, dim3, Ref{Ptr{Cvoid}}, Csize_t, cudaStream_t,), func, gridDim, blockDim, Base.cconvert(Ref{Ptr{Cvoid}}, args), sharedMem, stream)
 end
 
-function cudaLaunchKernel_ptsz(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args::Ptr{Ptr{Cvoid}}, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaLaunchKernel_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, dim3, dim3, Ptr{Ptr{Cvoid}}, Csize_t, cudaStream_t,), func, gridDim, blockDim, args, sharedMem, stream)
+function cudaLaunchCooperativeKernel(func::Ptr{Cvoid}, gridDim::dim3, blockDim::dim3, args::Ptr{Ptr{Cvoid}}, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
+    return ccall((:cudaLaunchCooperativeKernel, libcudart), cudaError_t, (Ptr{Cvoid}, dim3, dim3, Ptr{Ptr{Cvoid}}, Csize_t, cudaStream_t,), func, gridDim, blockDim, args, sharedMem, stream)
+end
+
+function cudaLaunchCooperativeKernelMultiDevice(launchParamsList::Array{cudaLaunchParams, 1}, numDevices::Cuint, flags::Cuint = Cuint(0))::cudaError_t
+    return ccall((:cudaLaunchCooperativeKernelMultiDevice, libcudart), cudaError_t, (Ref{cudaLaunchParams}, Cuint, Cuint,), Base.cconvert(Ref{cudaLaunchParams}, launchParamsList), numDevices, flags)
+end
+
+function cudaLaunchCooperativeKernelMultiDevice(launchParamsList::Ptr{cudaLaunchParams}, numDevices::Cuint, flags::Cuint = Cuint(0))::cudaError_t
+    return ccall((:cudaLaunchCooperativeKernelMultiDevice, libcudart), cudaError_t, (Ptr{cudaLaunchParams}, Cuint, Cuint,), launchParamsList, numDevices, flags)
 end
 
 function cudaFuncSetCacheConfig(func::Ptr{Cvoid}, cacheConfig::Cuint)::cudaError_t
@@ -391,12 +451,16 @@ function cudaFuncSetSharedMemConfig(func::Ptr{Cvoid}, config::Cuint)::cudaError_
     return ccall((:cudaFuncSetSharedMemConfig, libcudart), cudaError_t, (Ptr{Cvoid}, Cuint,), func, config)
 end
 
-function cudaFuncGetAttributes(p::Array{cudaFuncAttributes, 1}, c::Ptr{Cvoid})::cudaError_t
-    return ccall((:cudaFuncGetAttributes, libcudart), cudaError_t, (Ref{cudaFuncAttributes}, Ptr{Cvoid},), Base.cconvert(Ref{cudaFuncAttributes}, p), c)
+function cudaFuncGetAttributes(attr::Array{cudaFuncAttributes, 1}, func::Ptr{Cvoid})::cudaError_t
+    return ccall((:cudaFuncGetAttributes, libcudart), cudaError_t, (Ref{cudaFuncAttributes}, Ptr{Cvoid},), Base.cconvert(Ref{cudaFuncAttributes}, attr), func)
 end
 
-function cudaFuncGetAttributes(p::Ptr{cudaFuncAttributes}, c::Ptr{Cvoid})::cudaError_t
-    return ccall((:cudaFuncGetAttributes, libcudart), cudaError_t, (Ptr{cudaFuncAttributes}, Ptr{Cvoid},), p, c)
+function cudaFuncGetAttributes(attr::Ptr{cudaFuncAttributes}, func::Ptr{Cvoid})::cudaError_t
+    return ccall((:cudaFuncGetAttributes, libcudart), cudaError_t, (Ptr{cudaFuncAttributes}, Ptr{Cvoid},), attr, func)
+end
+
+function cudaFuncSetAttribute(func::Ptr{Cvoid}, attr::Cuint, value::Cint)::cudaError_t
+    return ccall((:cudaFuncSetAttribute, libcudart), cudaError_t, (Ptr{Cvoid}, Cuint, Cint,), func, attr, value)
 end
 
 function cudaSetDoubleForDevice(d::Array{Cdouble, 1})::cudaError_t
@@ -415,23 +479,27 @@ function cudaSetDoubleForHost(d::Ptr{Cdouble})::cudaError_t
     return ccall((:cudaSetDoubleForHost, libcudart), cudaError_t, (Ptr{Cdouble},), d)
 end
 
-function cudaOccupancyMaxActiveBlocksPerMultiprocessor(numBlocks::Array{Cint, 1}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSmemSize::Csize_t)::cudaError_t
-    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessor, libcudart), cudaError_t, (Ref{Cint}, Ptr{Cvoid}, Cint, Csize_t,), Base.cconvert(Ref{Cint}, numBlocks), func, blockSize, dynamicSmemSize)
+function cudaLaunchHostFunc(stream::cudaStream_t, fn::cudaHostFn_t, userData::Ptr{Cvoid})::cudaError_t
+    return ccall((:cudaLaunchHostFunc, libcudart), cudaError_t, (cudaStream_t, cudaHostFn_t, Ptr{Cvoid},), stream, fn, userData)
 end
 
-function cudaOccupancyMaxActiveBlocksPerMultiprocessor(numBlocks::Ptr{Cint}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSmemSize::Csize_t)::cudaError_t
-    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessor, libcudart), cudaError_t, (Ptr{Cint}, Ptr{Cvoid}, Cint, Csize_t,), numBlocks, func, blockSize, dynamicSmemSize)
+function cudaOccupancyMaxActiveBlocksPerMultiprocessor(numBlocks::Array{Cint, 1}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSMemSize::Csize_t)::cudaError_t
+    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessor, libcudart), cudaError_t, (Ref{Cint}, Ptr{Cvoid}, Cint, Csize_t,), Base.cconvert(Ref{Cint}, numBlocks), func, blockSize, dynamicSMemSize)
 end
 
-function cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(numBlocks::Array{Cint, 1}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSmemSize::Csize_t, flags::Cuint)::cudaError_t
-    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags, libcudart), cudaError_t, (Ref{Cint}, Ptr{Cvoid}, Cint, Csize_t, Cuint,), Base.cconvert(Ref{Cint}, numBlocks), func, blockSize, dynamicSmemSize, flags)
+function cudaOccupancyMaxActiveBlocksPerMultiprocessor(numBlocks::Ptr{Cint}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSMemSize::Csize_t)::cudaError_t
+    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessor, libcudart), cudaError_t, (Ptr{Cint}, Ptr{Cvoid}, Cint, Csize_t,), numBlocks, func, blockSize, dynamicSMemSize)
 end
 
-function cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(numBlocks::Ptr{Cint}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSmemSize::Csize_t, flags::Cuint)::cudaError_t
-    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags, libcudart), cudaError_t, (Ptr{Cint}, Ptr{Cvoid}, Cint, Csize_t, Cuint,), numBlocks, func, blockSize, dynamicSmemSize, flags)
+function cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(numBlocks::Array{Cint, 1}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSMemSize::Csize_t, flags::Cuint)::cudaError_t
+    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags, libcudart), cudaError_t, (Ref{Cint}, Ptr{Cvoid}, Cint, Csize_t, Cuint,), Base.cconvert(Ref{Cint}, numBlocks), func, blockSize, dynamicSMemSize, flags)
 end
 
-function cudaConfigureCall(gridDim::dim3, blockDim::dim3, sharedMem::Csize_t, stream::cudaStream_t)::cudaError_t
+function cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(numBlocks::Ptr{Cint}, func::Ptr{Cvoid}, blockSize::Cint, dynamicSMemSize::Csize_t, flags::Cuint)::cudaError_t
+    return ccall((:cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags, libcudart), cudaError_t, (Ptr{Cint}, Ptr{Cvoid}, Cint, Csize_t, Cuint,), numBlocks, func, blockSize, dynamicSMemSize, flags)
+end
+
+function cudaConfigureCall(gridDim::dim3, blockDim::dim3, sharedMem::Csize_t = Csize_t(0), stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaConfigureCall, libcudart), cudaError_t, (dim3, dim3, Csize_t, cudaStream_t,), gridDim, blockDim, sharedMem, stream)
 end
 
@@ -441,10 +509,6 @@ end
 
 function cudaLaunch(func::Ptr{Cvoid})::cudaError_t
     return ccall((:cudaLaunch, libcudart), cudaError_t, (Ptr{Cvoid},), func)
-end
-
-function cudaLaunch_ptsz(func::Ptr{Cvoid})::cudaError_t
-    return ccall((:cudaLaunch_ptsz, libcudart), cudaError_t, (Ptr{Cvoid},), func)
 end
 
 function cudaMallocManaged(devPtr::Array{Ptr{Cvoid}, 1}, size::Csize_t, flags::Cuint = cudaMemAttachGlobal)::cudaError_t
@@ -479,11 +543,11 @@ function cudaMallocPitch(devPtr::Ptr{Ptr{Cvoid}}, pitch::Ptr{Csize_t}, width::Cs
     return ccall((:cudaMallocPitch, libcudart), cudaError_t, (Ptr{Ptr{Cvoid}}, Ptr{Csize_t}, Csize_t, Csize_t,), devPtr, pitch, width, height)
 end
 
-function cudaMallocArray(array::Array{cudaArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, width::Csize_t, height::Csize_t, flags::Cuint)::cudaError_t
+function cudaMallocArray(array::Array{cudaArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, width::Csize_t, height::Csize_t = Csize_t(0), flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMallocArray, libcudart), cudaError_t, (Ref{cudaArray_t}, Ref{cudaChannelFormatDesc}, Csize_t, Csize_t, Cuint,), Base.cconvert(Ref{cudaArray_t}, array), Base.cconvert(Ref{cudaChannelFormatDesc}, desc), width, height, flags)
 end
 
-function cudaMallocArray(array::Ptr{cudaArray_t}, desc::Ptr{cudaChannelFormatDesc}, width::Csize_t, height::Csize_t, flags::Cuint)::cudaError_t
+function cudaMallocArray(array::Ptr{cudaArray_t}, desc::Ptr{cudaChannelFormatDesc}, width::Csize_t, height::Csize_t = Csize_t(0), flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMallocArray, libcudart), cudaError_t, (Ptr{cudaArray_t}, Ptr{cudaChannelFormatDesc}, Csize_t, Csize_t, Cuint,), array, desc, width, height, flags)
 end
 
@@ -543,19 +607,19 @@ function cudaMalloc3D(pitchedDevPtr::Ptr{cudaPitchedPtr}, extent::cudaExtent)::c
     return ccall((:cudaMalloc3D, libcudart), cudaError_t, (Ptr{cudaPitchedPtr}, cudaExtent,), pitchedDevPtr, extent)
 end
 
-function cudaMalloc3DArray(array::Array{cudaArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, extent::cudaExtent, flags::Cuint)::cudaError_t
+function cudaMalloc3DArray(array::Array{cudaArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, extent::cudaExtent, flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMalloc3DArray, libcudart), cudaError_t, (Ref{cudaArray_t}, Ref{cudaChannelFormatDesc}, cudaExtent, Cuint,), Base.cconvert(Ref{cudaArray_t}, array), Base.cconvert(Ref{cudaChannelFormatDesc}, desc), extent, flags)
 end
 
-function cudaMalloc3DArray(array::Ptr{cudaArray_t}, desc::Ptr{cudaChannelFormatDesc}, extent::cudaExtent, flags::Cuint)::cudaError_t
+function cudaMalloc3DArray(array::Ptr{cudaArray_t}, desc::Ptr{cudaChannelFormatDesc}, extent::cudaExtent, flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMalloc3DArray, libcudart), cudaError_t, (Ptr{cudaArray_t}, Ptr{cudaChannelFormatDesc}, cudaExtent, Cuint,), array, desc, extent, flags)
 end
 
-function cudaMallocMipmappedArray(mipmappedArray::Array{cudaMipmappedArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, extent::cudaExtent, numLevels::Cuint, flags::Cuint)::cudaError_t
+function cudaMallocMipmappedArray(mipmappedArray::Array{cudaMipmappedArray_t, 1}, desc::Array{cudaChannelFormatDesc, 1}, extent::cudaExtent, numLevels::Cuint, flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMallocMipmappedArray, libcudart), cudaError_t, (Ref{cudaMipmappedArray_t}, Ref{cudaChannelFormatDesc}, cudaExtent, Cuint, Cuint,), Base.cconvert(Ref{cudaMipmappedArray_t}, mipmappedArray), Base.cconvert(Ref{cudaChannelFormatDesc}, desc), extent, numLevels, flags)
 end
 
-function cudaMallocMipmappedArray(mipmappedArray::Ptr{cudaMipmappedArray_t}, desc::Ptr{cudaChannelFormatDesc}, extent::cudaExtent, numLevels::Cuint, flags::Cuint)::cudaError_t
+function cudaMallocMipmappedArray(mipmappedArray::Ptr{cudaMipmappedArray_t}, desc::Ptr{cudaChannelFormatDesc}, extent::cudaExtent, numLevels::Cuint, flags::Cuint = Cuint(0))::cudaError_t
     return ccall((:cudaMallocMipmappedArray, libcudart), cudaError_t, (Ptr{cudaMipmappedArray_t}, Ptr{cudaChannelFormatDesc}, cudaExtent, Cuint, Cuint,), mipmappedArray, desc, extent, numLevels, flags)
 end
 
@@ -583,27 +647,19 @@ function cudaMemcpy3DPeer(p::Ptr{cudaMemcpy3DPeerParms})::cudaError_t
     return ccall((:cudaMemcpy3DPeer, libcudart), cudaError_t, (Ptr{cudaMemcpy3DPeerParms},), p)
 end
 
-function cudaMemcpy3DAsync(p::Array{cudaMemcpy3DParms, 1}, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy3DAsync(p::Array{cudaMemcpy3DParms, 1}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy3DAsync, libcudart), cudaError_t, (Ref{cudaMemcpy3DParms}, cudaStream_t,), Base.cconvert(Ref{cudaMemcpy3DParms}, p), stream)
 end
 
-function cudaMemcpy3DAsync(p::Ptr{cudaMemcpy3DParms}, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy3DAsync(p::Ptr{cudaMemcpy3DParms}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy3DAsync, libcudart), cudaError_t, (Ptr{cudaMemcpy3DParms}, cudaStream_t,), p, stream)
 end
 
-function cudaMemcpy3DAsync_ptsz(p::Array{cudaMemcpy3DParms, 1}, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemcpy3DAsync_ptsz, libcudart), cudaError_t, (Ref{cudaMemcpy3DParms}, cudaStream_t,), Base.cconvert(Ref{cudaMemcpy3DParms}, p), stream)
-end
-
-function cudaMemcpy3DAsync_ptsz(p::Ptr{cudaMemcpy3DParms}, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemcpy3DAsync_ptsz, libcudart), cudaError_t, (Ptr{cudaMemcpy3DParms}, cudaStream_t,), p, stream)
-end
-
-function cudaMemcpy3DPeerAsync(p::Array{cudaMemcpy3DPeerParms, 1}, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy3DPeerAsync(p::Array{cudaMemcpy3DPeerParms, 1}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy3DPeerAsync, libcudart), cudaError_t, (Ref{cudaMemcpy3DPeerParms}, cudaStream_t,), Base.cconvert(Ref{cudaMemcpy3DPeerParms}, p), stream)
 end
 
-function cudaMemcpy3DPeerAsync(p::Ptr{cudaMemcpy3DPeerParms}, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy3DPeerAsync(p::Ptr{cudaMemcpy3DPeerParms}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy3DPeerAsync, libcudart), cudaError_t, (Ptr{cudaMemcpy3DPeerParms}, cudaStream_t,), p, stream)
 end
 
@@ -639,7 +695,7 @@ function cudaMemcpyFromArray(dst::Ptr{Cvoid}, src::cudaArray_const_t, wOffset::C
     return ccall((:cudaMemcpyFromArray, libcudart), cudaError_t, (Ptr{Cvoid}, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Cuint,), dst, src, wOffset, hOffset, count, kind)
 end
 
-function cudaMemcpyArrayToArray(dst::cudaArray_t, wOffsetDst::Csize_t, hOffsetDst::Csize_t, src::cudaArray_const_t, wOffsetSrc::Csize_t, hOffsetSrc::Csize_t, count::Csize_t, kind::Cuint)::cudaError_t
+function cudaMemcpyArrayToArray(dst::cudaArray_t, wOffsetDst::Csize_t, hOffsetDst::Csize_t, src::cudaArray_const_t, wOffsetSrc::Csize_t, hOffsetSrc::Csize_t, count::Csize_t, kind::Cuint = cudaMemcpyDeviceToDevice)::cudaError_t
     return ccall((:cudaMemcpyArrayToArray, libcudart), cudaError_t, (cudaArray_t, Csize_t, Csize_t, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Cuint,), dst, wOffsetDst, hOffsetDst, src, wOffsetSrc, hOffsetSrc, count, kind)
 end
 
@@ -655,59 +711,51 @@ function cudaMemcpy2DFromArray(dst::Ptr{Cvoid}, dpitch::Csize_t, src::cudaArray_
     return ccall((:cudaMemcpy2DFromArray, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Csize_t, Cuint,), dst, dpitch, src, wOffset, hOffset, width, height, kind)
 end
 
-function cudaMemcpy2DArrayToArray(dst::cudaArray_t, wOffsetDst::Csize_t, hOffsetDst::Csize_t, src::cudaArray_const_t, wOffsetSrc::Csize_t, hOffsetSrc::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint)::cudaError_t
+function cudaMemcpy2DArrayToArray(dst::cudaArray_t, wOffsetDst::Csize_t, hOffsetDst::Csize_t, src::cudaArray_const_t, wOffsetSrc::Csize_t, hOffsetSrc::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint = cudaMemcpyDeviceToDevice)::cudaError_t
     return ccall((:cudaMemcpy2DArrayToArray, libcudart), cudaError_t, (cudaArray_t, Csize_t, Csize_t, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Csize_t, Cuint,), dst, wOffsetDst, hOffsetDst, src, wOffsetSrc, hOffsetSrc, width, height, kind)
 end
 
-function cudaMemcpyToSymbol(symbol::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint)::cudaError_t
+function cudaMemcpyToSymbol(symbol::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, offset::Csize_t = Csize_t(0), kind::Cuint = cudaMemcpyHostToDevice)::cudaError_t
     return ccall((:cudaMemcpyToSymbol, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Csize_t, Cuint,), symbol, src, count, offset, kind)
 end
 
-function cudaMemcpyFromSymbol(dst::Ptr{Cvoid}, symbol::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint)::cudaError_t
+function cudaMemcpyFromSymbol(dst::Ptr{Cvoid}, symbol::Ptr{Cvoid}, count::Csize_t, offset::Csize_t = Csize_t(0), kind::Cuint = cudaMemcpyDeviceToHost)::cudaError_t
     return ccall((:cudaMemcpyFromSymbol, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Csize_t, Cuint,), dst, symbol, count, offset, kind)
 end
 
-function cudaMemcpyAsync(dst::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyAsync(dst::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Cuint, cudaStream_t,), dst, src, count, kind, stream)
 end
 
-function cudaMemcpyAsync_ptsz(dst::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemcpyAsync_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Cuint, cudaStream_t,), dst, src, count, kind, stream)
-end
-
-function cudaMemcpyPeerAsync(dst::Ptr{Cvoid}, dstDevice::Cint, src::Ptr{Cvoid}, srcDevice::Cint, count::Csize_t, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyPeerAsync(dst::Ptr{Cvoid}, dstDevice::Cint, src::Ptr{Cvoid}, srcDevice::Cint, count::Csize_t, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyPeerAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Cint, Ptr{Cvoid}, Cint, Csize_t, cudaStream_t,), dst, dstDevice, src, srcDevice, count, stream)
 end
 
-function cudaMemcpyToArrayAsync(dst::cudaArray_t, wOffset::Csize_t, hOffset::Csize_t, src::Ptr{Cvoid}, count::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyToArrayAsync(dst::cudaArray_t, wOffset::Csize_t, hOffset::Csize_t, src::Ptr{Cvoid}, count::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyToArrayAsync, libcudart), cudaError_t, (cudaArray_t, Csize_t, Csize_t, Ptr{Cvoid}, Csize_t, Cuint, cudaStream_t,), dst, wOffset, hOffset, src, count, kind, stream)
 end
 
-function cudaMemcpyFromArrayAsync(dst::Ptr{Cvoid}, src::cudaArray_const_t, wOffset::Csize_t, hOffset::Csize_t, count::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyFromArrayAsync(dst::Ptr{Cvoid}, src::cudaArray_const_t, wOffset::Csize_t, hOffset::Csize_t, count::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyFromArrayAsync, libcudart), cudaError_t, (Ptr{Cvoid}, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, src, wOffset, hOffset, count, kind, stream)
 end
 
-function cudaMemcpy2DAsync(dst::Ptr{Cvoid}, dpitch::Csize_t, src::Ptr{Cvoid}, spitch::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy2DAsync(dst::Ptr{Cvoid}, dpitch::Csize_t, src::Ptr{Cvoid}, spitch::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy2DAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Ptr{Cvoid}, Csize_t, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, dpitch, src, spitch, width, height, kind, stream)
 end
 
-function cudaMemcpy2DAsync_ptsz(dst::Ptr{Cvoid}, dpitch::Csize_t, src::Ptr{Cvoid}, spitch::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemcpy2DAsync_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Ptr{Cvoid}, Csize_t, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, dpitch, src, spitch, width, height, kind, stream)
-end
-
-function cudaMemcpy2DToArrayAsync(dst::cudaArray_t, wOffset::Csize_t, hOffset::Csize_t, src::Ptr{Cvoid}, spitch::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy2DToArrayAsync(dst::cudaArray_t, wOffset::Csize_t, hOffset::Csize_t, src::Ptr{Cvoid}, spitch::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy2DToArrayAsync, libcudart), cudaError_t, (cudaArray_t, Csize_t, Csize_t, Ptr{Cvoid}, Csize_t, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, wOffset, hOffset, src, spitch, width, height, kind, stream)
 end
 
-function cudaMemcpy2DFromArrayAsync(dst::Ptr{Cvoid}, dpitch::Csize_t, src::cudaArray_const_t, wOffset::Csize_t, hOffset::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpy2DFromArrayAsync(dst::Ptr{Cvoid}, dpitch::Csize_t, src::cudaArray_const_t, wOffset::Csize_t, hOffset::Csize_t, width::Csize_t, height::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpy2DFromArrayAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, cudaArray_const_t, Csize_t, Csize_t, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, dpitch, src, wOffset, hOffset, width, height, kind, stream)
 end
 
-function cudaMemcpyToSymbolAsync(symbol::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyToSymbolAsync(symbol::Ptr{Cvoid}, src::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyToSymbolAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Csize_t, Cuint, cudaStream_t,), symbol, src, count, offset, kind, stream)
 end
 
-function cudaMemcpyFromSymbolAsync(dst::Ptr{Cvoid}, symbol::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint, stream::cudaStream_t)::cudaError_t
+function cudaMemcpyFromSymbolAsync(dst::Ptr{Cvoid}, symbol::Ptr{Cvoid}, count::Csize_t, offset::Csize_t, kind::Cuint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemcpyFromSymbolAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t, Csize_t, Cuint, cudaStream_t,), dst, symbol, count, offset, kind, stream)
 end
 
@@ -723,28 +771,16 @@ function cudaMemset3D(pitchedDevPtr::cudaPitchedPtr, value::Cint, extent::cudaEx
     return ccall((:cudaMemset3D, libcudart), cudaError_t, (cudaPitchedPtr, Cint, cudaExtent,), pitchedDevPtr, value, extent)
 end
 
-function cudaMemsetAsync(devPtr::Ptr{Cvoid}, value::Cint, count::Csize_t, stream::cudaStream_t)::cudaError_t
+function cudaMemsetAsync(devPtr::Ptr{Cvoid}, value::Cint, count::Csize_t, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemsetAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Cint, Csize_t, cudaStream_t,), devPtr, value, count, stream)
 end
 
-function cudaMemsetAsync_ptsz(devPtr::Ptr{Cvoid}, value::Cint, count::Csize_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemsetAsync_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, Cint, Csize_t, cudaStream_t,), devPtr, value, count, stream)
+function cudaMemset2DAsync(devPtr::Ptr{Cvoid}, pitch::Csize_t, value::Cint, width::Csize_t, height::Csize_t, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
+    return ccall((:cudaMemset2DAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Cint, Csize_t, Csize_t, cudaStream_t,), devPtr, pitch, value, width, height, stream)
 end
 
-function cudaMemset2DAsync(devPtr::Ptr{Cvoid}, pitch::Csize_t, value::Cint, width::Csize_t, height::Csize_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemset2DAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Cint, Csize_t, Csize_t, cudaStream_t), devPtr, pitch, value, width, height, stream)
-end
-
-function cudaMemset2DAsync_ptsz(devPtr::Ptr{Cvoid}, pitch::Csize_t, value::Cint, width::Csize_t, height::Csize_t, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemset2DAsync_ptsz, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Cint, Csize_t, Csize_t, cudaStream_t), devPtr, pitch, value, width, height, stream)
-end
-
-function cudaMemset3DAsync(pitchedDevPtr::cudaPitchedPtr, value::Cint, extent::cudaExtent, stream::cudaStream_t)::cudaError_t
+function cudaMemset3DAsync(pitchedDevPtr::cudaPitchedPtr, value::Cint, extent::cudaExtent, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemset3DAsync, libcudart), cudaError_t, (cudaPitchedPtr, Cint, cudaExtent, cudaStream_t,), pitchedDevPtr, value, extent, stream)
-end
-
-function cudaMemset3DAsync_ptsz(pitchedDevPtr::cudaPitchedPtr, value::Cint, extent::cudaExtent, stream::cudaStream_t)::cudaError_t
-    return ccall((:cudaMemset3DAsync_ptsz, libcudart), cudaError_t, (cudaPitchedPtr, Cint, cudaExtent, cudaStream_t,), pitchedDevPtr, value, extent, stream)
 end
 
 function cudaGetSymbolAddress(devPtr::Array{Ptr{Cvoid}, 1}, symbol::Ptr{Cvoid})::cudaError_t
@@ -763,7 +799,7 @@ function cudaGetSymbolSize(size::Ptr{Csize_t}, symbol::Ptr{Cvoid})::cudaError_t
     return ccall((:cudaGetSymbolSize, libcudart), cudaError_t, (Ptr{Csize_t}, Ptr{Cvoid},), size, symbol)
 end
 
-function cudaMemPrefetchAsync(devPtr::Ptr{Cvoid}, count::Csize_t, dstDevice::Cint, stream::cudaStream_t)::cudaError_t
+function cudaMemPrefetchAsync(devPtr::Ptr{Cvoid}, count::Csize_t, dstDevice::Cint, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaMemPrefetchAsync, libcudart), cudaError_t, (Ptr{Cvoid}, Csize_t, Cint, cudaStream_t,), devPtr, count, dstDevice, stream)
 end
 
@@ -815,19 +851,19 @@ function cudaGraphicsResourceSetMapFlags(resource::cudaGraphicsResource_t, flags
     return ccall((:cudaGraphicsResourceSetMapFlags, libcudart), cudaError_t, (cudaGraphicsResource_t, Cuint,), resource, flags)
 end
 
-function cudaGraphicsMapResources(count::Cint, resources::Array{cudaGraphicsResource_t, 1}, stream::cudaStream_t)::cudaError_t
+function cudaGraphicsMapResources(count::Cint, resources::Array{cudaGraphicsResource_t, 1}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaGraphicsMapResources, libcudart), cudaError_t, (Cint, Ref{cudaGraphicsResource_t}, cudaStream_t,), count, Base.cconvert(Ref{cudaGraphicsResource_t}, resources), stream)
 end
 
-function cudaGraphicsMapResources(count::Cint, resources::Ptr{cudaGraphicsResource_t}, stream::cudaStream_t)::cudaError_t
+function cudaGraphicsMapResources(count::Cint, resources::Ptr{cudaGraphicsResource_t}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaGraphicsMapResources, libcudart), cudaError_t, (Cint, Ptr{cudaGraphicsResource_t}, cudaStream_t,), count, resources, stream)
 end
 
-function cudaGraphicsUnmapResources(count::Cint, resources::Array{cudaGraphicsResource_t, 1}, stream::cudaStream_t)::cudaError_t
+function cudaGraphicsUnmapResources(count::Cint, resources::Array{cudaGraphicsResource_t, 1}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaGraphicsUnmapResources, libcudart), cudaError_t, (Cint, Ref{cudaGraphicsResource_t}, cudaStream_t,), count, Base.cconvert(Ref{cudaGraphicsResource_t}, resources), stream)
 end
 
-function cudaGraphicsUnmapResources(count::Cint, resources::Ptr{cudaGraphicsResource_t}, stream::cudaStream_t)::cudaError_t
+function cudaGraphicsUnmapResources(count::Cint, resources::Ptr{cudaGraphicsResource_t}, stream::cudaStream_t = cudaStream_t(C_NULL))::cudaError_t
     return ccall((:cudaGraphicsUnmapResources, libcudart), cudaError_t, (Cint, Ptr{cudaGraphicsResource_t}, cudaStream_t,), count, resources, stream)
 end
 
@@ -867,11 +903,11 @@ function cudaCreateChannelDesc(x::Cint, y::Cint, z::Cint, w::Cint, f::Cuint)::cu
     return ccall((:cudaCreateChannelDesc, libcudart), cudaChannelFormatDesc, (Cint, Cint, Cint, Cint, Cuint,), x, y, z, w, f)
 end
 
-function cudaBindTexture(offset::Array{Csize_t, 1}, texref::Array{textureReference, 1}, devPtr::Ptr{Cvoid}, desc::Array{cudaChannelFormatDesc, 1}, size::Csize_t)::cudaError_t
+function cudaBindTexture(offset::Array{Csize_t, 1}, texref::Array{textureReference, 1}, devPtr::Ptr{Cvoid}, desc::Array{cudaChannelFormatDesc, 1}, size::Csize_t = Csize_t(typemax(Cuint)))::cudaError_t
     return ccall((:cudaBindTexture, libcudart), cudaError_t, (Ref{Csize_t}, Ref{textureReference}, Ptr{Cvoid}, Ref{cudaChannelFormatDesc}, Csize_t,), Base.cconvert(Ref{Csize_t}, offset), Base.cconvert(Ref{textureReference}, texref), devPtr, Base.cconvert(Ref{cudaChannelFormatDesc}, desc), size)
 end
 
-function cudaBindTexture(offset::Ptr{Csize_t}, texref::Ptr{textureReference}, devPtr::Ptr{Cvoid}, desc::Ptr{cudaChannelFormatDesc}, size::Csize_t)::cudaError_t
+function cudaBindTexture(offset::Ptr{Csize_t}, texref::Ptr{textureReference}, devPtr::Ptr{Cvoid}, desc::Ptr{cudaChannelFormatDesc}, size::Csize_t = Csize_t(typemax(Cuint)))::cudaError_t
     return ccall((:cudaBindTexture, libcudart), cudaError_t, (Ptr{Csize_t}, Ptr{textureReference}, Ptr{Cvoid}, Ptr{cudaChannelFormatDesc}, Csize_t,), offset, texref, devPtr, desc, size)
 end
 
@@ -1009,6 +1045,238 @@ end
 
 function cudaRuntimeGetVersion(runtimeVersion::Ptr{Cint})::cudaError_t
     return ccall((:cudaRuntimeGetVersion, libcudart), cudaError_t, (Ptr{Cint},), runtimeVersion)
+end
+
+function cudaGraphCreate(pGraph::Array{cudaGraph_t, 1}, flags::Cuint)::cudaError_t
+    return ccall((:cudaGraphCreate, libcudart), cudaError_t, (Ref{cudaGraph_t}, Cuint,), Base.cconvert(Ref{cudaGraph_t}, pGraph), flags)
+end
+
+function cudaGraphCreate(pGraph::Ptr{cudaGraph_t}, flags::Cuint)::cudaError_t
+    return ccall((:cudaGraphCreate, libcudart), cudaError_t, (Ptr{cudaGraph_t}, Cuint,), pGraph, flags)
+end
+
+function cudaGraphAddKernelNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t, pNodeParams::Array{cudaKernelNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphAddKernelNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t, Ref{cudaKernelNodeParams},), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies, Base.cconvert(Ref{cudaKernelNodeParams}, pNodeParams))
+end
+
+function cudaGraphAddKernelNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t, pNodeParams::Ptr{cudaKernelNodeParams})::cudaError_t
+    return ccall((:cudaGraphAddKernelNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t, Ptr{cudaKernelNodeParams},), pGraphNode, graph, pDependencies, numDependencies, pNodeParams)
+end
+
+function cudaGraphKernelNodeGetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaKernelNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphKernelNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaKernelNodeParams},), node, Base.cconvert(Ref{cudaKernelNodeParams}, pNodeParams))
+end
+
+function cudaGraphKernelNodeGetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaKernelNodeParams})::cudaError_t
+    return ccall((:cudaGraphKernelNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaKernelNodeParams},), node, pNodeParams)
+end
+
+function cudaGraphKernelNodeSetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaKernelNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphKernelNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaKernelNodeParams},), node, Base.cconvert(Ref{cudaKernelNodeParams}, pNodeParams))
+end
+
+function cudaGraphKernelNodeSetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaKernelNodeParams})::cudaError_t
+    return ccall((:cudaGraphKernelNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaKernelNodeParams},), node, pNodeParams)
+end
+
+function cudaGraphAddMemcpyNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t, pCopyParams::Array{cudaMemcpy3DParms, 1})::cudaError_t
+    return ccall((:cudaGraphAddMemcpyNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t, Ref{cudaMemcpy3DParms},), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies, Base.cconvert(Ref{cudaMemcpy3DParms}, pCopyParams))
+end
+
+function cudaGraphAddMemcpyNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t, pCopyParams::Ptr{cudaMemcpy3DParms})::cudaError_t
+    return ccall((:cudaGraphAddMemcpyNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t, Ptr{cudaMemcpy3DParms},), pGraphNode, graph, pDependencies, numDependencies, pCopyParams)
+end
+
+function cudaGraphMemcpyNodeGetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaMemcpy3DParms, 1})::cudaError_t
+    return ccall((:cudaGraphMemcpyNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaMemcpy3DParms},), node, Base.cconvert(Ref{cudaMemcpy3DParms}, pNodeParams))
+end
+
+function cudaGraphMemcpyNodeGetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaMemcpy3DParms})::cudaError_t
+    return ccall((:cudaGraphMemcpyNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaMemcpy3DParms},), node, pNodeParams)
+end
+
+function cudaGraphMemcpyNodeSetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaMemcpy3DParms, 1})::cudaError_t
+    return ccall((:cudaGraphMemcpyNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaMemcpy3DParms},), node, Base.cconvert(Ref{cudaMemcpy3DParms}, pNodeParams))
+end
+
+function cudaGraphMemcpyNodeSetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaMemcpy3DParms})::cudaError_t
+    return ccall((:cudaGraphMemcpyNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaMemcpy3DParms},), node, pNodeParams)
+end
+
+function cudaGraphAddMemsetNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t, pMemsetParams::Array{cudaMemsetParams, 1})::cudaError_t
+    return ccall((:cudaGraphAddMemsetNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t, Ref{cudaMemsetParams},), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies, Base.cconvert(Ref{cudaMemsetParams}, pMemsetParams))
+end
+
+function cudaGraphAddMemsetNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t, pMemsetParams::Ptr{cudaMemsetParams})::cudaError_t
+    return ccall((:cudaGraphAddMemsetNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t, Ptr{cudaMemsetParams},), pGraphNode, graph, pDependencies, numDependencies, pMemsetParams)
+end
+
+function cudaGraphMemsetNodeGetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaMemsetParams, 1})::cudaError_t
+    return ccall((:cudaGraphMemsetNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaMemsetParams},), node, Base.cconvert(Ref{cudaMemsetParams}, pNodeParams))
+end
+
+function cudaGraphMemsetNodeGetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaMemsetParams})::cudaError_t
+    return ccall((:cudaGraphMemsetNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaMemsetParams},), node, pNodeParams)
+end
+
+function cudaGraphMemsetNodeSetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaMemsetParams, 1})::cudaError_t
+    return ccall((:cudaGraphMemsetNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaMemsetParams},), node, Base.cconvert(Ref{cudaMemsetParams}, pNodeParams))
+end
+
+function cudaGraphMemsetNodeSetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaMemsetParams})::cudaError_t
+    return ccall((:cudaGraphMemsetNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaMemsetParams},), node, pNodeParams)
+end
+
+function cudaGraphAddHostNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t, pNodeParams::Array{cudaHostNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphAddHostNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t, Ref{cudaHostNodeParams},), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies, Base.cconvert(Ref{cudaHostNodeParams}, pNodeParams))
+end
+
+function cudaGraphAddHostNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t, pNodeParams::Ptr{cudaHostNodeParams})::cudaError_t
+    return ccall((:cudaGraphAddHostNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t, Ptr{cudaHostNodeParams},), pGraphNode, graph, pDependencies, numDependencies, pNodeParams)
+end
+
+function cudaGraphHostNodeGetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaHostNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphHostNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaHostNodeParams},), node, Base.cconvert(Ref{cudaHostNodeParams}, pNodeParams))
+end
+
+function cudaGraphHostNodeGetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaHostNodeParams})::cudaError_t
+    return ccall((:cudaGraphHostNodeGetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaHostNodeParams},), node, pNodeParams)
+end
+
+function cudaGraphHostNodeSetParams(node::cudaGraphNode_t, pNodeParams::Array{cudaHostNodeParams, 1})::cudaError_t
+    return ccall((:cudaGraphHostNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaHostNodeParams},), node, Base.cconvert(Ref{cudaHostNodeParams}, pNodeParams))
+end
+
+function cudaGraphHostNodeSetParams(node::cudaGraphNode_t, pNodeParams::Ptr{cudaHostNodeParams})::cudaError_t
+    return ccall((:cudaGraphHostNodeSetParams, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaHostNodeParams},), node, pNodeParams)
+end
+
+function cudaGraphAddChildGraphNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t, childGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphAddChildGraphNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t, cudaGraph_t,), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies, childGraph)
+end
+
+function cudaGraphAddChildGraphNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t, childGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphAddChildGraphNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t, cudaGraph_t,), pGraphNode, graph, pDependencies, numDependencies, childGraph)
+end
+
+function cudaGraphChildGraphNodeGetGraph(node::cudaGraphNode_t, pGraph::Array{cudaGraph_t, 1})::cudaError_t
+    return ccall((:cudaGraphChildGraphNodeGetGraph, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaGraph_t},), node, Base.cconvert(Ref{cudaGraph_t}, pGraph))
+end
+
+function cudaGraphChildGraphNodeGetGraph(node::cudaGraphNode_t, pGraph::Ptr{cudaGraph_t})::cudaError_t
+    return ccall((:cudaGraphChildGraphNodeGetGraph, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaGraph_t},), node, pGraph)
+end
+
+function cudaGraphAddEmptyNode(pGraphNode::Array{cudaGraphNode_t, 1}, graph::cudaGraph_t, pDependencies::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphAddEmptyNode, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Csize_t,), Base.cconvert(Ref{cudaGraphNode_t}, pGraphNode), graph, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), numDependencies)
+end
+
+function cudaGraphAddEmptyNode(pGraphNode::Ptr{cudaGraphNode_t}, graph::cudaGraph_t, pDependencies::Ptr{cudaGraphNode_t}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphAddEmptyNode, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Csize_t,), pGraphNode, graph, pDependencies, numDependencies)
+end
+
+function cudaGraphClone(pGraphClone::Array{cudaGraph_t, 1}, originalGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphClone, libcudart), cudaError_t, (Ref{cudaGraph_t}, cudaGraph_t,), Base.cconvert(Ref{cudaGraph_t}, pGraphClone), originalGraph)
+end
+
+function cudaGraphClone(pGraphClone::Ptr{cudaGraph_t}, originalGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphClone, libcudart), cudaError_t, (Ptr{cudaGraph_t}, cudaGraph_t,), pGraphClone, originalGraph)
+end
+
+function cudaGraphNodeFindInClone(pNode::Array{cudaGraphNode_t, 1}, originalNode::cudaGraphNode_t, clonedGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphNodeFindInClone, libcudart), cudaError_t, (Ref{cudaGraphNode_t}, cudaGraphNode_t, cudaGraph_t,), Base.cconvert(Ref{cudaGraphNode_t}, pNode), originalNode, clonedGraph)
+end
+
+function cudaGraphNodeFindInClone(pNode::Ptr{cudaGraphNode_t}, originalNode::cudaGraphNode_t, clonedGraph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphNodeFindInClone, libcudart), cudaError_t, (Ptr{cudaGraphNode_t}, cudaGraphNode_t, cudaGraph_t,), pNode, originalNode, clonedGraph)
+end
+
+function cudaGraphNodeGetType(node::cudaGraphNode_t, pType::Array{Cuint, 1})::cudaError_t
+    return ccall((:cudaGraphNodeGetType, libcudart), cudaError_t, (cudaGraphNode_t, Ref{Cuint},), node, Base.cconvert(Ref{Cuint}, pType))
+end
+
+function cudaGraphNodeGetType(node::cudaGraphNode_t, pType::Ptr{Cuint})::cudaError_t
+    return ccall((:cudaGraphNodeGetType, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{Cuint},), node, pType)
+end
+
+function cudaGraphGetNodes(graph::cudaGraph_t, nodes::Array{cudaGraphNode_t, 1}, numNodes::Array{Csize_t, 1})::cudaError_t
+    return ccall((:cudaGraphGetNodes, libcudart), cudaError_t, (cudaGraph_t, Ref{cudaGraphNode_t}, Ref{Csize_t},), graph, Base.cconvert(Ref{cudaGraphNode_t}, nodes), Base.cconvert(Ref{Csize_t}, numNodes))
+end
+
+function cudaGraphGetNodes(graph::cudaGraph_t, nodes::Ptr{cudaGraphNode_t}, numNodes::Ptr{Csize_t})::cudaError_t
+    return ccall((:cudaGraphGetNodes, libcudart), cudaError_t, (cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{Csize_t},), graph, nodes, numNodes)
+end
+
+function cudaGraphGetRootNodes(graph::cudaGraph_t, pRootNodes::Array{cudaGraphNode_t, 1}, pNumRootNodes::Array{Csize_t, 1})::cudaError_t
+    return ccall((:cudaGraphGetRootNodes, libcudart), cudaError_t, (cudaGraph_t, Ref{cudaGraphNode_t}, Ref{Csize_t},), graph, Base.cconvert(Ref{cudaGraphNode_t}, pRootNodes), Base.cconvert(Ref{Csize_t}, pNumRootNodes))
+end
+
+function cudaGraphGetRootNodes(graph::cudaGraph_t, pRootNodes::Ptr{cudaGraphNode_t}, pNumRootNodes::Ptr{Csize_t})::cudaError_t
+    return ccall((:cudaGraphGetRootNodes, libcudart), cudaError_t, (cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{Csize_t},), graph, pRootNodes, pNumRootNodes)
+end
+
+function cudaGraphGetEdges(graph::cudaGraph_t, from::Array{cudaGraphNode_t, 1}, to::Array{cudaGraphNode_t, 1}, numEdges::Array{Csize_t, 1})::cudaError_t
+    return ccall((:cudaGraphGetEdges, libcudart), cudaError_t, (cudaGraph_t, Ref{cudaGraphNode_t}, Ref{cudaGraphNode_t}, Ref{Csize_t},), graph, Base.cconvert(Ref{cudaGraphNode_t}, from), Base.cconvert(Ref{cudaGraphNode_t}, to), Base.cconvert(Ref{Csize_t}, numEdges))
+end
+
+function cudaGraphGetEdges(graph::cudaGraph_t, from::Ptr{cudaGraphNode_t}, to::Ptr{cudaGraphNode_t}, numEdges::Ptr{Csize_t})::cudaError_t
+    return ccall((:cudaGraphGetEdges, libcudart), cudaError_t, (cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{cudaGraphNode_t}, Ptr{Csize_t},), graph, from, to, numEdges)
+end
+
+function cudaGraphNodeGetDependencies(node::cudaGraphNode_t, pDependencies::Array{cudaGraphNode_t, 1}, pNumDependencies::Array{Csize_t, 1})::cudaError_t
+    return ccall((:cudaGraphNodeGetDependencies, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaGraphNode_t}, Ref{Csize_t},), node, Base.cconvert(Ref{cudaGraphNode_t}, pDependencies), Base.cconvert(Ref{Csize_t}, pNumDependencies))
+end
+
+function cudaGraphNodeGetDependencies(node::cudaGraphNode_t, pDependencies::Ptr{cudaGraphNode_t}, pNumDependencies::Ptr{Csize_t})::cudaError_t
+    return ccall((:cudaGraphNodeGetDependencies, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaGraphNode_t}, Ptr{Csize_t},), node, pDependencies, pNumDependencies)
+end
+
+function cudaGraphNodeGetDependentNodes(node::cudaGraphNode_t, pDependentNodes::Array{cudaGraphNode_t, 1}, pNumDependentNodes::Array{Csize_t, 1})::cudaError_t
+    return ccall((:cudaGraphNodeGetDependentNodes, libcudart), cudaError_t, (cudaGraphNode_t, Ref{cudaGraphNode_t}, Ref{Csize_t},), node, Base.cconvert(Ref{cudaGraphNode_t}, pDependentNodes), Base.cconvert(Ref{Csize_t}, pNumDependentNodes))
+end
+
+function cudaGraphNodeGetDependentNodes(node::cudaGraphNode_t, pDependentNodes::Ptr{cudaGraphNode_t}, pNumDependentNodes::Ptr{Csize_t})::cudaError_t
+    return ccall((:cudaGraphNodeGetDependentNodes, libcudart), cudaError_t, (cudaGraphNode_t, Ptr{cudaGraphNode_t}, Ptr{Csize_t},), node, pDependentNodes, pNumDependentNodes)
+end
+
+function cudaGraphAddDependencies(graph::cudaGraph_t, from::Array{cudaGraphNode_t, 1}, to::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphAddDependencies, libcudart), cudaError_t, (cudaGraph_t, Ref{cudaGraphNode_t}, Ref{cudaGraphNode_t}, Csize_t,), graph, Base.cconvert(Ref{cudaGraphNode_t}, from), Base.cconvert(Ref{cudaGraphNode_t}, to), numDependencies)
+end
+
+function cudaGraphAddDependencies(graph::cudaGraph_t, from::Ptr{cudaGraphNode_t}, to::Ptr{cudaGraphNode_t}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphAddDependencies, libcudart), cudaError_t, (cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{cudaGraphNode_t}, Csize_t,), graph, from, to, numDependencies)
+end
+
+function cudaGraphRemoveDependencies(graph::cudaGraph_t, from::Array{cudaGraphNode_t, 1}, to::Array{cudaGraphNode_t, 1}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphRemoveDependencies, libcudart), cudaError_t, (cudaGraph_t, Ref{cudaGraphNode_t}, Ref{cudaGraphNode_t}, Csize_t,), graph, Base.cconvert(Ref{cudaGraphNode_t}, from), Base.cconvert(Ref{cudaGraphNode_t}, to), numDependencies)
+end
+
+function cudaGraphRemoveDependencies(graph::cudaGraph_t, from::Ptr{cudaGraphNode_t}, to::Ptr{cudaGraphNode_t}, numDependencies::Csize_t)::cudaError_t
+    return ccall((:cudaGraphRemoveDependencies, libcudart), cudaError_t, (cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{cudaGraphNode_t}, Csize_t,), graph, from, to, numDependencies)
+end
+
+function cudaGraphDestroyNode(node::cudaGraphNode_t)::cudaError_t
+    return ccall((:cudaGraphDestroyNode, libcudart), cudaError_t, (cudaGraphNode_t,), node)
+end
+
+function cudaGraphInstantiate(pGraphExec::Array{cudaGraphExec_t, 1}, graph::cudaGraph_t, pErrorNode::Array{cudaGraphNode_t, 1}, pLogBuffer::Array{UInt8, 1}, bufferSize::Csize_t)::cudaError_t
+    return ccall((:cudaGraphInstantiate, libcudart), cudaError_t, (Ref{cudaGraphExec_t}, cudaGraph_t, Ref{cudaGraphNode_t}, Ref{UInt8}, Csize_t,), Base.cconvert(Ref{cudaGraphExec_t}, pGraphExec), graph, Base.cconvert(Ref{cudaGraphNode_t}, pErrorNode), Base.cconvert(Ref{UInt8}, pLogBuffer), bufferSize)
+end
+
+function cudaGraphInstantiate(pGraphExec::Ptr{cudaGraphExec_t}, graph::cudaGraph_t, pErrorNode::Ptr{cudaGraphNode_t}, pLogBuffer::Ptr{UInt8}, bufferSize::Csize_t)::cudaError_t
+    return ccall((:cudaGraphInstantiate, libcudart), cudaError_t, (Ptr{cudaGraphExec_t}, cudaGraph_t, Ptr{cudaGraphNode_t}, Ptr{UInt8}, Csize_t,), pGraphExec, graph, pErrorNode, pLogBuffer, bufferSize)
+end
+
+function cudaGraphLaunch(graphExec::cudaGraphExec_t, stream::cudaStream_t)::cudaError_t
+    return ccall((:cudaGraphLaunch, libcudart), cudaError_t, (cudaGraphExec_t, cudaStream_t,), graphExec, stream)
+end
+
+function cudaGraphExecDestroy(graphExec::cudaGraphExec_t)::cudaError_t
+    return ccall((:cudaGraphExecDestroy, libcudart), cudaError_t, (cudaGraphExec_t,), graphExec)
+end
+
+function cudaGraphDestroy(graph::cudaGraph_t)::cudaError_t
+    return ccall((:cudaGraphDestroy, libcudart), cudaError_t, (cudaGraph_t,), graph)
 end
 
 function cudaGetExportTable(ppExportTable::Array{Ptr{Cvoid}, 1}, pExportTableId::Array{cudaUUID_t, 1})::cudaError_t

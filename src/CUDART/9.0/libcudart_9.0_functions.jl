@@ -1038,5 +1038,3 @@ end
 function cudaGetExportTable(ppExportTable::Ptr{Ptr{Cvoid}}, pExportTableId::Ptr{cudaUUID_t})::cudaError_t
     return ccall((:cudaGetExportTable, libcudart), cudaError_t, (Ptr{Ptr{Cvoid}}, Ptr{cudaUUID_t},), ppExportTable, pExportTableId)
 end
-
-

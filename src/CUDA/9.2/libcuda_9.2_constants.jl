@@ -610,6 +610,7 @@ const CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL = CUpointer_attribute(9)
 
 const CUfunction_attribute = Cuint
 
+# possible CUfunction_attribute values
 const CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK             = CUfunction_attribute(0)
 const CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES                 = CUfunction_attribute(1)
 const CU_FUNC_ATTRIBUTE_CONST_SIZE_BYTES                  = CUfunction_attribute(2)

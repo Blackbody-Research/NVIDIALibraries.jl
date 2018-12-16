@@ -1,5 +1,5 @@
 #=*
-* CUDA API v9.1 definitions
+* CUDA API v10.0 definitions
 *
 * Copyright (C) 2018 Qijia (Michael) Jin
 * This program is free software; you can redistribute it and/or
@@ -16,13 +16,13 @@
 *=#
 
 # These definitions are defined according to how they were declared
-# in CUDA 9.1's 'cuda.h'.
+# in CUDA 10.0's 'cuda.h'.
 
 const cuuint32_t = Cuint
 
 const cuuint64_t = Culonglong
 
-const CUDA_VERSION = 9010
+const CUDA_VERSION = 10000
 
 # CUdeviceptr available since CUDA 3.2
 const CUdeviceptr = Ptr{Nothing}
@@ -52,6 +52,16 @@ const CUgraphicsResource = Ptr{Nothing}
 const CUtexObject = Culonglong
 
 const CUsurfObject = Culonglong
+
+const CUexternalMemory = Ptr{Nothing}
+
+const CUexternalSemaphore = Ptr{Nothing}
+
+const CUgraph = Ptr{Nothing}
+
+const CUgraphNode = Ptr{Nothing}
+
+const CUgraphExec = Ptr{Nothing}
 
 struct CUuuid
     bytes::NTuple{16, UInt8}
@@ -560,12 +570,15 @@ const CU_DEVICE_ATTRIBUTE_CAN_USE_STREAM_WAIT_VALUE_NOR                = CUdevic
 const CU_DEVICE_ATTRIBUTE_COOPERATIVE_LAUNCH                           = CUdevice_attribute(95)
 const CU_DEVICE_ATTRIBUTE_COOPERATIVE_MULTI_DEVICE_LAUNCH              = CUdevice_attribute(96)
 const CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK_OPTIN            = CUdevice_attribute(97)
-
+const CU_DEVICE_ATTRIBUTE_CAN_FLUSH_REMOTE_WRITES                      = CUdevice_attribute(98)
+const CU_DEVICE_ATTRIBUTE_HOST_REGISTER_SUPPORTED                      = CUdevice_attribute(99)
+const CU_DEVICE_ATTRIBUTE_PAGEABLE_MEMORY_ACCESS_USES_HOST_PAGE_TABLES = CUdevice_attribute(100)
+const CU_DEVICE_ATTRIBUTE_DIRECT_MANAGED_MEM_ACCESS_FROM_HOST          = CUdevice_attribute(101)
 #=
-In CUDA 9.1, 'CU_DEVICE_ATTRIBUTE_MAX' is 102 after enumerating from
-'CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK_OPTIN'
+In CUDA 10.0, 'CU_DEVICE_ATTRIBUTE_MAX' is 102 after enumerating from
+'CU_DEVICE_ATTRIBUTE_DIRECT_MANAGED_MEM_ACCESS_FROM_HOST'
 =#
-const CU_DEVICE_ATTRIBUTE_MAX                                          = CUdevice_attribute(98)
+const CU_DEVICE_ATTRIBUTE_MAX                                          = CUdevice_attribute(102)
 
 struct CUdevprop
     maxThreadsPerBlock::Cint
@@ -603,6 +616,7 @@ const CU_POINTER_ATTRIBUTE_P2P_TOKENS     = CUpointer_attribute(5)
 const CU_POINTER_ATTRIBUTE_SYNC_MEMOPS    = CUpointer_attribute(6)
 const CU_POINTER_ATTRIBUTE_BUFFER_ID      = CUpointer_attribute(7)
 const CU_POINTER_ATTRIBUTE_IS_MANAGED     = CUpointer_attribute(8)
+const CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL = CUpointer_attribute(9)
 
 const CUfunction_attribute = Cuint
 
@@ -618,7 +632,7 @@ const CU_FUNC_ATTRIBUTE_CACHE_MODE_CA                     = CUfunction_attribute
 const CU_FUNC_ATTRIBUTE_MAX_DYNAMIC_SHARED_SIZE_BYTES     = CUfunction_attribute(8)
 const CU_FUNC_ATTRIBUTE_PREFERRED_SHARED_MEMORY_CARVEOUT  = CUfunction_attribute(9)
 #=
-In CUDA 9.1, 'CU_FUNC_ATTRIBUTE_MAX' is 10 by enumerating from
+In CUDA 10.0, 'CU_FUNC_ATTRIBUTE_MAX' is 10 by enumerating from
 'CU_FUNC_ATTRIBUTE_PREFERRED_SHARED_MEMORY_CARVEOUT'.
 =#
 const CU_FUNC_ATTRIBUTE_MAX                               = CUfunction_attribute(10)
@@ -702,11 +716,15 @@ const CU_JIT_CACHE_MODE                   = CUjit_option(14)
 =#
 const CU_JIT_NEW_SM3X_OPT                 = CUjit_option(15)
 const CU_JIT_FAST_COMPILE                 = CUjit_option(16)
+
+const CU_JIT_GLOBAL_SYMBOL_NAMES          = CUjit_option(17)
+const CU_JIT_GLOBAL_SYMBOL_ADDRESSES      = CUjit_option(18)
+const CU_JIT_GLOBAL_SYMBOL_COUNT          = CUjit_option(19)
 #=
-In CUDA 9.1, 'CU_JIT_NUM_OPTIONS' is 17 by enumerating from
-'CU_JIT_FAST_COMPILE'.
+In CUDA 10.0, 'CU_JIT_NUM_OPTIONS' is 20 by enumerating from
+'CU_JIT_GLOBAL_SYMBOL_COUNT'.
 =#
-const CU_JIT_NUM_OPTIONS                  = CUjit_option(17)
+const CU_JIT_NUM_OPTIONS                  = CUjit_option(20)
 
 const CUjit_target = Cuint
 
@@ -724,7 +742,6 @@ const CU_TARGET_COMPUTE_60 = CUjit_target(60)       # < Compute device class 6.0
 const CU_TARGET_COMPUTE_61 = CUjit_target(61)       # < Compute device class 6.1
 const CU_TARGET_COMPUTE_62 = CUjit_target(62)       # < Compute device class 6.2
 const CU_TARGET_COMPUTE_70 = CUjit_target(70)       # < Compute device class 7.0
-const CU_TARGET_COMPUTE_73 = CUjit_target(73)       # < Compute device class 7.3
 const CU_TARGET_COMPUTE_75 = CUjit_target(75)       # < Compute device class 7.5
 
 const CUjit_fallback = Cuint
@@ -749,7 +766,7 @@ const CU_JIT_INPUT_FATBINARY  = CUjitInputType(2)
 const CU_JIT_INPUT_OBJECT     = CUjitInputType(3)
 const CU_JIT_INPUT_LIBRARY    = CUjitInputType(4)
 #=
-In CUDA 9.1, 'CU_JIT_NUM_INPUT_TYPES' is 5 by enumerating from
+In CUDA 10.0, 'CU_JIT_NUM_INPUT_TYPES' is 5 by enumerating from
 'CU_JIT_INPUT_LIBRARY'.
 =#
 const CU_JIT_NUM_INPUT_TYPES  = CUjitInputType(5)
@@ -791,11 +808,12 @@ const CU_LIMIT_PRINTF_FIFO_SIZE                 = CUlimit(0x01)
 const CU_LIMIT_MALLOC_HEAP_SIZE                 = CUlimit(0x02)
 const CU_LIMIT_DEV_RUNTIME_SYNC_DEPTH           = CUlimit(0x03)
 const CU_LIMIT_DEV_RUNTIME_PENDING_LAUNCH_COUNT = CUlimit(0x04)
+const CU_LIMIT_MAX_L2_FETCH_GRANULARITY         = CUlimit(0x05)
 #=
-In CUDA 9.1, 'CU_LIMIT_MAX' is 5 by enumerating from
-'CU_LIMIT_DEV_RUNTIME_PENDING_LAUNCH_COUNT'.
+In CUDA 10.0, 'CU_LIMIT_MAX' is 6 by enumerating from
+'CU_LIMIT_MAX_L2_FETCH_GRANULARITY'.
 =#
-const CU_LIMIT_MAX                              = CUlimit(0x05)
+const CU_LIMIT_MAX                              = CUlimit(0x06)
 
 const CUresourcetype = Cuint
 
@@ -804,6 +822,84 @@ const CU_RESOURCE_TYPE_ARRAY           = CUresourcetype(0x00)
 const CU_RESOURCE_TYPE_MIPMAPPED_ARRAY = CUresourcetype(0x01)
 const CU_RESOURCE_TYPE_LINEAR          = CUresourcetype(0x02)
 const CU_RESOURCE_TYPE_PITCH2D         = CUresourcetype(0x03)
+
+# type association for CUDA host function
+const CUhostFn = Ptr{Nothing}
+
+# CUDA kernel node parameters available since CUDA 10.0
+struct CUDA_KERNEL_NODE_PARAMS
+    func::CUfunction
+    gridDimX::Cuint
+    gridDimY::Cuint
+    gridDimZ::Cuint
+    blockDimX::Cuint
+    blockDimY::Cuint
+    blockDimZ::Cuint
+    sharedMemBytes::Cuint
+    kernelParams::Ptr{Ptr{Nothing}}
+    extra::Ptr{Ptr{Nothing}}
+end
+
+Base.zero(::Type{CUDA_KERNEL_NODE_PARAMS}) = CUDA_KERNEL_NODE_PARAMS(
+    CUfunction(C_NULL),
+    Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0),
+    Ptr{Ptr{Nothing}}(0),
+    Ptr{Ptr{Nothing}}(0))
+Base.zero(x::CUDA_KERNEL_NODE_PARAMS) = zero(typeof(x))
+
+# CUDA memset node parameters available since CUDA 10.0
+struct CUDA_MEMSET_NODE_PARAMS
+    dst::CUdeviceptr
+    pitch::Csize_t
+    value::Cuint
+    elementSize::Cuint
+    width::Csize_t
+    height::Csize_t
+end
+
+Base.zero(::Type{CUDA_MEMSET_NODE_PARAMS}) = CUDA_MEMSET_NODE_PARAMS(
+    CUdeviceptr(0),
+    Csize_t(0),
+    Cuint(0),
+    Cuint(0),
+    Csize_t(0),
+    Csize_t(0))
+Base.zero(x::CUDA_MEMSET_NODE_PARAMS) = zero(typeof(x))
+
+# CUDA host node parameters available since CUDA 10.0
+struct CUDA_HOST_NODE_PARAMS
+    fn::CUhostFn
+    userData::Ptr{Nothing}
+end
+
+Base.zero(::Type{CUDA_HOST_NODE_PARAMS}) = CUDA_HOST_NODE_PARAMS(CUhostFn(0), C_NULL)
+Base.zero(x::CUDA_HOST_NODE_PARAMS) = zero(typeof(x))
+
+# CUgraphNodeType available since CUDA 10.0
+const CUgraphNodeType = Cuint
+
+# possible CUgraphNodeType values
+const CU_GRAPH_NODE_TYPE_KERNEL = CUgraphNodeType(0)
+const CU_GRAPH_NODE_TYPE_MEMCPY = CUgraphNodeType(1)
+const CU_GRAPH_NODE_TYPE_MEMSET = CUgraphNodeType(2)
+const CU_GRAPH_NODE_TYPE_HOST   = CUgraphNodeType(3)
+const CU_GRAPH_NODE_TYPE_GRAPH  = CUgraphNodeType(4)
+const CU_GRAPH_NODE_TYPE_EMPTY  = CUgraphNodeType(5)
+#=
+In CUDA 10.0, 'CU_GRAPH_NODE_TYPE_COUNT' is 6 by enumerating from
+'CU_GRAPH_NODE_TYPE_EMPTY'
+=#
+const CU_GRAPH_NODE_TYPE_COUNT  = CUgraphNodeType(6)
+
+# CUstreamCaptureStatus available since CUDA 10.0
+const CUstreamCaptureStatus = Cuint
+
+# possible CUstreamCaptureStatus values
+const CU_STREAM_CAPTURE_STATUS_NONE         = CUstreamCaptureStatus(0)
+const CU_STREAM_CAPTURE_STATUS_ACTIVE       = CUstreamCaptureStatus(1)
+const CU_STREAM_CAPTURE_STATUS_INVALIDATED  = CUstreamCaptureStatus(2)
 
 const CUresult = Cuint
 
@@ -845,6 +941,7 @@ const CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND = CUresult(302)
 const CUDA_ERROR_SHARED_OBJECT_INIT_FAILED      = CUresult(303)
 const CUDA_ERROR_OPERATING_SYSTEM               = CUresult(304)
 const CUDA_ERROR_INVALID_HANDLE                 = CUresult(400)
+const CUDA_ERROR_ILLEGAL_STATE                  = CUresult(401)
 const CUDA_ERROR_NOT_FOUND                      = CUresult(500)
 const CUDA_ERROR_NOT_READY                      = CUresult(600)
 const CUDA_ERROR_ILLEGAL_ADDRESS                = CUresult(700)
@@ -868,6 +965,15 @@ const CUDA_ERROR_LAUNCH_FAILED                  = CUresult(719)
 const CUDA_ERROR_COOPERATIVE_LAUNCH_TOO_LARGE   = CUresult(720)
 const CUDA_ERROR_NOT_PERMITTED                  = CUresult(800)
 const CUDA_ERROR_NOT_SUPPORTED                  = CUresult(801)
+const CUDA_ERROR_SYSTEM_NOT_READY               = CUresult(802)
+const CUDA_ERROR_STREAM_CAPTURE_UNSUPPORTED     = CUresult(900)
+const CUDA_ERROR_STREAM_CAPTURE_INVALIDATED     = CUresult(901)
+const CUDA_ERROR_STREAM_CAPTURE_MERGE           = CUresult(902)
+const CUDA_ERROR_STREAM_CAPTURE_UNMATCHED       = CUresult(903)
+const CUDA_ERROR_STREAM_CAPTURE_UNJOINED        = CUresult(904)
+const CUDA_ERROR_STREAM_CAPTURE_ISOLATION       = CUresult(905)
+const CUDA_ERROR_STREAM_CAPTURE_IMPLICIT        = CUresult(906)
+const CUDA_ERROR_CAPTURED_EVENT                 = CUresult(907)
 const CUDA_ERROR_UNKNOWN                        = CUresult(999)
 
 const CUdevice_P2PAttribute = Cuint
@@ -876,6 +982,8 @@ const CUdevice_P2PAttribute = Cuint
 const CU_DEVICE_P2P_ATTRIBUTE_PERFORMANCE_RANK              = CUdevice_P2PAttribute(0x01)
 const CU_DEVICE_P2P_ATTRIBUTE_ACCESS_SUPPORTED              = CUdevice_P2PAttribute(0x02)
 const CU_DEVICE_P2P_ATTRIBUTE_NATIVE_ATOMIC_SUPPORTED       = CUdevice_P2PAttribute(0x03)
+const CU_DEVICE_P2P_ATTRIBUTE_ARRAY_ACCESS_ACCESS_SUPPORTED = CUdevice_P2PAttribute(0x04)
+const CU_DEVICE_P2P_ATTRIBUTE_CUDA_ARRAY_ACCESS_SUPPORTED   = CUdevice_P2PAttribute(0x04)
 
 # type association for CUDA stream callback function
 const CUstreamCallback = Ptr{Nothing}
@@ -1353,16 +1461,273 @@ Base.zero(::Type{CUDA_LAUNCH_PARAMS}) = CUDA_LAUNCH_PARAMS(CUfunction(0),
                                             Ptr{Ptr{Nothing}}(0))
 Base.zero(x::CUDA_LAUNCH_PARAMS) = zero(typeof(x))
 
+# CUexternalMemoryHandleType available since CUDA 10.0
+const CUexternalMemoryHandleType = Cuint
+
+# possible CUexternalMemoryHandleType values
+const CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD          = CUexternalMemoryHandleType(1)
+const CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32       = CUexternalMemoryHandleType(2)
+const CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT   = CUexternalMemoryHandleType(3)
+const CU_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP         = CUexternalMemoryHandleType(4)
+const CU_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE     = CUexternalMemoryHandleType(5)
+
+# possible CUDA_EXTERNAL_MEMORY_HANDLE_DESC flags
+const CUDA_EXTERNAL_MEMORY_DEDICATED    = Cuint(0x1)
+
+if (Sys.WORD_SIZE == 64)
+    struct CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd
+        fd::Cint
+        pad::NTuple{3, Cuint}
+    end
+    Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0), Cuint(0), Cuint(0)))
+elseif (Sys.WORD_SIZE == 32)
+    struct CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd
+        fd::Cint
+        pad::NTuple{1, Cuint}
+    end
+    Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0),))
+end
+Base.zero(x::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32
+    handle::Ptr{Nothing}
+    name::Ptr{Nothing}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32(
+    C_NULL,
+    C_NULL)
+Base.zero(x::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32) = zero(typeof(x))
+
+const CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle = Union{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd,
+                                                    CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32}
+
+if (Sys.WORD_SIZE == 64)
+    @assert((sizeof(CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd) == 16) &&
+            (sizeof(CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32) == 16))
+    Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0), Cuint(0), Cuint(0)))
+elseif (Sys.WORD_SIZE == 32)
+    @assert((sizeof(CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd) == 8) &&
+            (sizeof(CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32) == 8))
+    Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0),))
+end
+Base.zero(x::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle) = zero(typeof(x))
+
+# type casting between possible CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle data types
+CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd(cemhdhw::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32) = Base.unsafe_load(Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd}(Base.unsafe_convert(Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32}, Base.cconvert(Ref{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32}, cemhdhw))))
+
+CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32(cemhdhf::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd) = Base.unsafe_load(Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_win32}(Base.unsafe_convert(Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd}, Base.cconvert(Ref{CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle_fd}, cemhdhf))))
+
+# CUDA_EXTERNAL_MEMORY_HANDLE_DESC available since CUDA 10.0
+struct CUDA_EXTERNAL_MEMORY_HANDLE_DESC
+    type::CUexternalMemoryHandleType
+    handle::CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle
+    size::Culonglong
+    flags::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_MEMORY_HANDLE_DESC}) = CUDA_EXTERNAL_MEMORY_HANDLE_DESC(
+    CUexternalMemoryHandleType(0),
+    zero(CUDA_EXTERNAL_MEMORY_HANDLE_DESC_handle),
+    Culonglong(0),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_MEMORY_HANDLE_DESC) = zero(typeof(x))
+
+# CUDA_EXTERNAL_MEMORY_BUFFER_DESC available since CUDA 10.0
+struct CUDA_EXTERNAL_MEMORY_BUFFER_DESC
+    offset::Culonglong
+    size::Culonglong
+    flags::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_MEMORY_BUFFER_DESC}) = CUDA_EXTERNAL_MEMORY_BUFFER_DESC(
+    Culonglong(0),
+    Culonglong(0),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_MEMORY_BUFFER_DESC) = zero(typeof(x))
+
+# CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC available since CUDA 10.0
+struct CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC
+    offset::Culonglong
+    arrayDesc::CUDA_ARRAY3D_DESCRIPTOR
+    numLevels::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC}) = CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC(
+    Culonglong(0),
+    zero(CUDA_ARRAY3D_DESCRIPTOR),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC) = zero(typeof(x))
+
+# CUexternalSemaphoreHandleType available since CUDA 10.0
+const CUexternalSemaphoreHandleType = Cuint
+
+# possible CUexternalSemaphoreHandleType values
+const CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD           = CUexternalSemaphoreHandleType(1)
+const CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32        = CUexternalSemaphoreHandleType(2)
+const CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT    = CUexternalSemaphoreHandleType(3)
+const CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE         = CUexternalSemaphoreHandleType(4)
+
+if (Sys.WORD_SIZE == 64)
+    struct CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd
+        fd::Cint
+        pad::NTuple{3, Cuint}
+    end
+    Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0), Cuint(0), Cuint(0)))
+elseif (Sys.WORD_SIZE == 32)
+    struct CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd
+        fd::Cint
+        pad::NTuple{1, Cuint}
+    end
+    Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0),))
+end
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32
+    handle::Ptr{Nothing}
+    name::Ptr{Nothing}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32(
+    C_NULL,
+    C_NULL)
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32) = zero(typeof(x))
+
+const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle = Union{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd,
+                                                        CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32}
+
+if (Sys.WORD_SIZE == 64)
+    @assert((sizeof(CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd) == 16) &&
+            (sizeof(CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32) == 16))
+    Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0), Cuint(0), Cuint(0)))
+elseif (Sys.WORD_SIZE == 32)
+    @assert((sizeof(CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd) == 8) &&
+            (sizeof(CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32) == 8))
+    Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd(
+        Cint(0),
+        (Cuint(0),))
+end
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle) = zero(typeof(x))
+
+# type casting between possible CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle data types
+CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd(ceshdhw::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32) = Base.unsafe_load(Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd}(Base.unsafe_convert(Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32}, Base.cconvert(Ref{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32}, ceshdhw))))
+
+CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32(ceshdhf::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd) = Base.unsafe_load(Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_win32}(Base.unsafe_convert(Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd}, Base.cconvert(Ref{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle_fd}, ceshdhf))))
+
+# CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC available since CUDA 10.0
+struct CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC
+    type::CUexternalSemaphoreHandleType
+    handle::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle
+    flags::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC}) = CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC(
+    CUexternalSemaphoreHandleType(0),
+    zero(CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC_handle),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence
+    value::Culonglong
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence}) = CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence(Culonglong(0))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params
+    fence::CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params}) = CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params(
+    zero(CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params_fence),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params) = zero(typeof(x))
+
+# CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS available since CUDA 10.0
+struct CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS
+    params::CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params
+    flags::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS}) = CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS(
+    zero(CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS_params),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence
+    value::Culonglong
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence}) = CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence(Culonglong(0))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence) = zero(typeof(x))
+
+struct CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params
+    fence::CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params}) = CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params(
+    zero(CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params_fence),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params) = zero(typeof(x))
+
+# CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS available since CUDA 10.0
+struct CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS
+    params::CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params
+    flags::Cuint
+    reserved::NTuple{16, Cuint}
+end
+
+Base.zero(::Type{CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS}) = CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS(
+    zero(CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS_params),
+    Cuint(0),
+    (Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0),
+    Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0)))
+Base.zero(x::CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS) = zero(typeof(x))
+
 # possible cuLaunchCooperativeKernelMultiDevice() flags
 const CUDA_COOPERATIVE_LAUNCH_MULTI_DEVICE_NO_PRE_LAUNCH_SYNC  = Cuint(0x01)
 const CUDA_COOPERATIVE_LAUNCH_MULTI_DEVICE_NO_POST_LAUNCH_SYNC = Cuint(0x02)
 
-const CUDA_ARRAY3D_LAYERED        = Cuint(0x01)
-const CUDA_ARRAY3D_2DARRAY        = Cuint(0x01)
-const CUDA_ARRAY3D_SURFACE_LDST   = Cuint(0x02)
-const CUDA_ARRAY3D_CUBEMAP        = Cuint(0x04)
-const CUDA_ARRAY3D_TEXTURE_GATHER = Cuint(0x08)
-const CUDA_ARRAY3D_DEPTH_TEXTURE  = Cuint(0x10)
+const CUDA_ARRAY3D_LAYERED          = Cuint(0x01)
+const CUDA_ARRAY3D_2DARRAY          = Cuint(0x01)
+const CUDA_ARRAY3D_SURFACE_LDST     = Cuint(0x02)
+const CUDA_ARRAY3D_CUBEMAP          = Cuint(0x04)
+const CUDA_ARRAY3D_TEXTURE_GATHER   = Cuint(0x08)
+const CUDA_ARRAY3D_DEPTH_TEXTURE    = Cuint(0x10)
+const CUDA_ARRAY3D_COLOR_ATTACHMENT = Cuint(0x20)
 
 # possible cuTexRefSetArray() flags
 const CU_TRSA_OVERRIDE_FORMAT = Cuint(0x01)
