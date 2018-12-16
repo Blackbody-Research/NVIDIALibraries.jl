@@ -77,14 +77,13 @@ function cuDeviceGetUuid(uuid::Ptr{CUuuid}, dev::CUdevice)::CUresult
 end
 
 # cuDeviceGetLuid() available since CUDA 10.0
-if (Sys.iswindows())
-    function cuDeviceGetLuid(luid::Array{UInt8, 1}, deviceNodeMask::Array{Cuint, 1}, dev::CUdevice)::CUresult
-        return ccall((:cuDeviceGetLuid, libcuda), CUresult, (Ref{UInt8}, Ref{Cuint}, CUdevice,), Base.cconvert(Ref{UInt8}, luid), Base.cconvert(Ref{Cuint}, deviceNodeMask), dev)
-    end
-    
-    function cuDeviceGetLuid(luid::Ptr{UInt8}, deviceNodeMask::Ptr{Cuint}, dev::CUdevice)::CUresult
-        return ccall((:cuDeviceGetLuid, libcuda), CUresult, (Ptr{UInt8}, Ptr{Cuint}, CUdevice,), luid, deviceNodeMask, dev)
-    end
+# cuDeviceGetLuid() exists only on Windows operating systems
+function cuDeviceGetLuid(luid::Array{UInt8, 1}, deviceNodeMask::Array{Cuint, 1}, dev::CUdevice)::CUresult
+    return ccall((:cuDeviceGetLuid, libcuda), CUresult, (Ref{UInt8}, Ref{Cuint}, CUdevice,), Base.cconvert(Ref{UInt8}, luid), Base.cconvert(Ref{Cuint}, deviceNodeMask), dev)
+end
+
+function cuDeviceGetLuid(luid::Ptr{UInt8}, deviceNodeMask::Ptr{Cuint}, dev::CUdevice)::CUresult
+    return ccall((:cuDeviceGetLuid, libcuda), CUresult, (Ptr{UInt8}, Ptr{Cuint}, CUdevice,), luid, deviceNodeMask, dev)
 end
 
 # cuDeviceTotalMem() available since CUDA 3.2
