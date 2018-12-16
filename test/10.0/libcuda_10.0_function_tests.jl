@@ -1,10 +1,10 @@
 #=*
-* Check if CUDA v8.0 functions are wrapped properly.
+* Check if CUDA v10.0 functions are wrapped properly.
 *
 * These tests assumed cuInit() has not been called.
 *
 * In addition, these tests were taken from CUDA library driver v9.0 tests
-* and have not been tested with CUDA library driver v8.0.
+* and have not been tested on CUDA library driver v8.0.
 *
 * Copyright (C) 2018 Qijia (Michael) Jin
 * This program is free software; you can redistribute it and/or
@@ -36,8 +36,18 @@ println("cuDeviceGet(): ", cuda_error_name(cuDeviceGet(Ptr{CUdevice}(C_NULL), Ci
 println("cuDeviceGetCount(): ", cuda_error_name(cuDeviceGetCount(Ptr{Cint}(C_NULL))))
 @test (cuDeviceGetCount(Ptr{Cint}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
-println("cuDeviceGetName(): ", cuda_error_name(cuDeviceGetName(Ptr{UInt8}(C_NULL), Cint(0), typemax(CUdevice))))
-@test (cuDeviceGetName(Ptr{UInt8}(C_NULL), Cint(0), typemax(CUdevice)) == CUDA_ERROR_NOT_INITIALIZED)
+println("cuDeviceGetName(): ", cuda_error_name(cuDeviceGetName(Ptr{UInt8}(C_NULL), Cint(0), CUdevice(0))))
+@test (cuDeviceGetName(Ptr{UInt8}(C_NULL), Cint(0), CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuDeviceGetUuid(): ", cuda_error_name(cuDeviceGetUuid(Ptr{CUuuid}(C_NULL), CUdevice(0))))
+@test (cuDeviceGetUuid(Ptr{CUuuid}(C_NULL), CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
+
+if (Sys.iswindows())
+	println("cuDeviceGetLuid(): ", cuda_error_name(cuDeviceGetLuid(Ptr{UInt8}(C_NULL), Ptr{Cuint}(C_NULL), CUdevice(0))))
+	@test (cuDeviceGetLuid(Ptr{UInt8}(C_NULL), Ptr{Cuint}(C_NULL), CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
+else
+	@test_skip (cuDeviceGetLuid(Ptr{UInt8}(C_NULL), Ptr{Cuint}(C_NULL), CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
+end
 
 println("cuDeviceTotalMem(): ", cuda_error_name(cuDeviceTotalMem(Ptr{Csize_t}(C_NULL), CUdevice(0))))
 @test (cuDeviceTotalMem(Ptr{Csize_t}(C_NULL), CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
@@ -61,7 +71,7 @@ println("cuDevicePrimaryCtxSetFlags(): ", cuda_error_name(cuDevicePrimaryCtxSetF
 @test (cuDevicePrimaryCtxSetFlags(CUdevice(0), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuDevicePrimaryCtxGetState(): ", cuda_error_name(cuDevicePrimaryCtxGetState(CUdevice(0), Ptr{Cuint}(C_NULL), Ptr{Cint}(C_NULL))))
-@test (cuDevicePrimaryCtxGetState(CUdevice(0), Ptr{Cuint}(C_NULL), Ptr{Cint}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+@test (cuDevicePrimaryCtxGetState(CUdevice(0), Ptr{Cuint}(C_NULL), Ptr{Cint}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
 
 println("cuDevicePrimaryCtxReset(): ", cuda_error_name(cuDevicePrimaryCtxReset(CUdevice(0))))
 @test (cuDevicePrimaryCtxReset(CUdevice(0)) == CUDA_ERROR_NOT_INITIALIZED)
@@ -88,7 +98,7 @@ println("cuCtxGetDevice(): ", cuda_error_name(cuCtxGetDevice(Ptr{CUdevice}(C_NUL
 @test (cuCtxGetDevice(Ptr{CUdevice}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuCtxGetFlags(): ", cuda_error_name(cuCtxGetFlags(Ptr{Cuint}(C_NULL))))
-@test (cuCtxGetFlags(Ptr{CUctx_flags}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+@test (cuCtxGetFlags(Ptr{Cuint}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
 
 println("cuCtxSynchronize(): ", cuda_error_name(cuCtxSynchronize()))
 @test (cuCtxSynchronize() == CUDA_ERROR_NOT_INITIALIZED)
@@ -390,11 +400,23 @@ println("cuStreamGetPriority(): ", cuda_error_name(cuStreamGetPriority(CUstream(
 println("cuStreamGetFlags(): ", cuda_error_name(cuStreamGetFlags(CUstream(C_NULL), Ptr{Cuint}(C_NULL))))
 @test (cuStreamGetFlags(CUstream(C_NULL), Ptr{Cuint}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
 
+println("cuStreamGetCtx(): ", cuda_error_name(cuStreamGetCtx(CUstream(C_NULL), Ptr{CUcontext}(C_NULL))))
+@test (cuStreamGetCtx(CUstream(C_NULL), Ptr{CUcontext}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
 println("cuStreamWaitEvent(): ", cuda_error_name(cuStreamWaitEvent(CUstream(C_NULL), CUevent(C_NULL), Cuint(0))))
 @test (cuStreamWaitEvent(CUstream(C_NULL), CUevent(C_NULL), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuStreamAddCallback(): ", cuda_error_name(cuStreamAddCallback(CUstream(C_NULL), CUstreamCallback(C_NULL), C_NULL, Cuint(0))))
 @test (cuStreamAddCallback(CUstream(C_NULL), CUstreamCallback(C_NULL), C_NULL, Cuint(0)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuStreamBeginCapture(): ", cuda_error_name(cuStreamBeginCapture(CUstream(C_NULL))))
+@test (cuStreamBeginCapture(CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuStreamEndCapture(): ", cuda_error_name(cuStreamEndCapture(CUstream(C_NULL), Ptr{CUgraph}(C_NULL))))
+@test (cuStreamEndCapture(CUstream(C_NULL), Ptr{CUgraph}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuStreamIsCapturing(): ", cuda_error_name(cuStreamIsCapturing(CUstream(C_NULL), Ptr{CUstreamCaptureStatus}(C_NULL))))
+@test (cuStreamIsCapturing(CUstream(C_NULL), Ptr{CUstreamCaptureStatus}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
 
 println("cuStreamAttachMemAsync(): ", cuda_error_name(cuStreamAttachMemAsync(CUstream(C_NULL), CUdeviceptr(0), Csize_t(0), Cuint(0))))
 @test (cuStreamAttachMemAsync(CUstream(C_NULL), CUdeviceptr(0), Csize_t(0), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
@@ -409,11 +431,11 @@ println("cuStreamDestroy(): ", cuda_error_name(cuStreamDestroy(CUstream(C_NULL))
 @test (cuStreamDestroy(CUstream(C_NULL)) == CUDA_ERROR_INVALID_HANDLE)
 
 println("cuEventCreate(): ", cuda_error_name(cuEventCreate(Ptr{CUevent}(C_NULL), Cuint(0))))
-@test (cuEventCreate(Ptr{CUevent}(C_NULL), CUevent_flags(0)) == CUDA_ERROR_NOT_INITIALIZED)
+@test (cuEventCreate(Ptr{CUevent}(C_NULL), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
 
-# segmentation fault when passing C_NULL to cuEventRecord()
-# println("cuEventRecord(): ", cuda_error_name(cuEventRecord(CUevent(C_NULL), CUstream(C_NULL))))
-@test_skip (cuEventRecord(CUevent(C_NULL), CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+# segmentation fault does not occur with CUDA driver version 10.0
+println("cuEventRecord(): ", cuda_error_name(cuEventRecord(CUevent(C_NULL), CUstream(C_NULL))))
+@test (cuEventRecord(CUevent(C_NULL), CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuEventQuery(): ", cuda_error_name(cuEventQuery(CUevent(C_NULL))))
 @test (cuEventQuery(CUevent(C_NULL)) == CUDA_ERROR_INVALID_HANDLE)
@@ -426,6 +448,30 @@ println("cuEventDestroy(): ", cuda_error_name(cuEventDestroy(CUevent(C_NULL))))
 
 println("cuEventElapsedTime(): ", cuda_error_name(cuEventElapsedTime(Ptr{Cfloat}(C_NULL), CUevent(C_NULL), CUevent(C_NULL))))
 @test (cuEventElapsedTime(Ptr{Cfloat}(C_NULL), CUevent(C_NULL), CUevent(C_NULL)) == CUDA_ERROR_INVALID_HANDLE)
+
+println("cuImportExternalMemory(): ", cuda_error_name(cuImportExternalMemory(Ptr{CUexternalMemory}(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC}(C_NULL))))
+@test (cuImportExternalMemory(Ptr{CUexternalMemory}(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_HANDLE_DESC}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuExternalMemoryGetMappedBuffer(): ", cuda_error_name(cuExternalMemoryGetMappedBuffer(Ptr{CUdeviceptr}(C_NULL), CUexternalMemory(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_BUFFER_DESC}(C_NULL))))
+@test (cuExternalMemoryGetMappedBuffer(Ptr{CUdeviceptr}(C_NULL), CUexternalMemory(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_BUFFER_DESC}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuExternalMemoryGetMappedMipmappedArray(): ", cuda_error_name(cuExternalMemoryGetMappedMipmappedArray(Ptr{CUmipmappedArray}(C_NULL), CUexternalMemory(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC}(C_NULL))))
+@test (cuExternalMemoryGetMappedMipmappedArray(Ptr{CUmipmappedArray}(C_NULL), CUexternalMemory(C_NULL), Ptr{CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuDestroyExternalMemory(): ", cuda_error_name(cuDestroyExternalMemory(CUexternalMemory(C_NULL))))
+@test (cuDestroyExternalMemory(CUexternalMemory(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuImportExternalSemaphore(): ", cuda_error_name(cuImportExternalSemaphore(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC}(C_NULL))))
+@test (cuImportExternalSemaphore(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuSignalExternalSemaphoresAsync(): ", cuda_error_name(cuSignalExternalSemaphoresAsync(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS}(C_NULL), Cuint(0), CUstream(C_NULL))))
+@test (cuSignalExternalSemaphoresAsync(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS}(C_NULL), Cuint(0), CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuWaitExternalSemaphoresAsync(): ", cuda_error_name(cuWaitExternalSemaphoresAsync(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS}(C_NULL), Cuint(0), CUstream(C_NULL))))
+@test (cuWaitExternalSemaphoresAsync(Ptr{CUexternalSemaphore}(C_NULL), Ptr{CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS}(C_NULL), Cuint(0), CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuDestroyExternalSemaphore(): ", cuda_error_name(cuDestroyExternalSemaphore(CUexternalSemaphore(C_NULL))))
+@test (cuDestroyExternalSemaphore(CUexternalSemaphore(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuStreamWaitValue32(): ", cuda_error_name(cuStreamWaitValue32(CUstream(C_NULL), CUdeviceptr(0), cuuint32_t(0), Cuint(0))))
 @test (cuStreamWaitValue32(CUstream(C_NULL), CUdeviceptr(0), cuuint32_t(0), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
@@ -445,6 +491,9 @@ println("cuStreamBatchMemOp(): ", cuda_error_name(cuStreamBatchMemOp(CUstream(C_
 println("cuFuncGetAttribute(): ", cuda_error_name(cuFuncGetAttribute(Ptr{Cint}(C_NULL), CUfunction_attribute(0), CUfunction(C_NULL))))
 @test (cuFuncGetAttribute(Ptr{Cint}(C_NULL), CUfunction_attribute(0), CUfunction(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
+println("cuFuncSetAttribute(): ", cuda_error_name(cuFuncSetAttribute(CUfunction(C_NULL), CUfunction_attribute(0), Cint(0))))
+@test (cuFuncSetAttribute(CUfunction(C_NULL), CUfunction_attribute(0), Cint(0)) == CUDA_ERROR_NOT_INITIALIZED)
+
 println("cuFuncSetCacheConfig(): ", cuda_error_name(cuFuncSetCacheConfig(CUfunction(C_NULL), CUfunc_cache(0))))
 @test (cuFuncSetCacheConfig(CUfunction(C_NULL), CUfunc_cache(0)) == CUDA_ERROR_NOT_INITIALIZED)
 
@@ -453,6 +502,15 @@ println("cuFuncSetSharedMemConfig(): ", cuda_error_name(cuFuncSetSharedMemConfig
 
 println("cuLaunchKernel(): ", cuda_error_name(cuLaunchKernel(CUfunction(C_NULL), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), CUstream(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL))))
 @test (cuLaunchKernel(CUfunction(C_NULL), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), CUstream(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuLaunchCooperativeKernel(): ", cuda_error_name(cuLaunchCooperativeKernel(CUfunction(C_NULL), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), CUstream(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL))))
+@test (cuLaunchCooperativeKernel(CUfunction(C_NULL), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), Cuint(0), CUstream(C_NULL), Ptr{Ptr{Cvoid}}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuLaunchCooperativeKernelMultiDevice(): ", cuda_error_name(cuLaunchCooperativeKernelMultiDevice(Ptr{CUDA_LAUNCH_PARAMS}(C_NULL), Cuint(0), Cuint(0))))
+@test (cuLaunchCooperativeKernelMultiDevice(Ptr{CUDA_LAUNCH_PARAMS}(C_NULL), Cuint(0), Cuint(0)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuLaunchHostFunc(): ", cuda_error_name(cuLaunchHostFunc(CUstream(C_NULL), CUhostFn(C_NULL), C_NULL)))
+@test (cuLaunchHostFunc(CUstream(C_NULL), CUhostFn(C_NULL), C_NULL) == CUDA_ERROR_INVALID_VALUE)
 
 println("cuFuncSetBlockShape(): ", cuda_error_name(cuFuncSetBlockShape(CUfunction(C_NULL), Cint(0), Cint(0), Cint(0))))
 @test (cuFuncSetBlockShape(CUfunction(C_NULL), Cint(0), Cint(0), Cint(0)) == CUDA_ERROR_NOT_INITIALIZED)
@@ -483,6 +541,99 @@ println("cuLaunchGridAsync(): ", cuda_error_name(cuLaunchGridAsync(CUfunction(C_
 
 println("cuParamSetTexRef(): ", cuda_error_name(cuParamSetTexRef(CUfunction(C_NULL), Cint(0), CUtexref(C_NULL))))
 @test (cuParamSetTexRef(CUfunction(C_NULL), Cint(0), CUtexref(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphCreate(): ", cuda_error_name(cuGraphCreate(Ptr{CUgraph}(C_NULL), Cuint(0))))
+@test (cuGraphCreate(Ptr{CUgraph}(C_NULL), Cuint(0)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphAddKernelNode(): ", cuda_error_name(cuGraphAddKernelNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL))))
+@test (cuGraphAddKernelNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphKernelNodeGetParams(): ", cuda_error_name(cuGraphKernelNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL))))
+@test (cuGraphKernelNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphKernelNodeSetParams(): ", cuda_error_name(cuGraphKernelNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL))))
+@test (cuGraphKernelNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_KERNEL_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphAddMemcpyNode(): ", cuda_error_name(cuGraphAddMemcpyNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_MEMCPY3D}(C_NULL), CUcontext(C_NULL))))
+@test (cuGraphAddMemcpyNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_MEMCPY3D}(C_NULL), CUcontext(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphMemcpyNodeGetParams(): ", cuda_error_name(cuGraphMemcpyNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMCPY3D}(C_NULL))))
+@test (cuGraphMemcpyNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMCPY3D}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphMemcpyNodeSetParams(): ", cuda_error_name(cuGraphMemcpyNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMCPY3D}(C_NULL))))
+@test (cuGraphMemcpyNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMCPY3D}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphAddMemsetNode(): ", cuda_error_name(cuGraphAddMemsetNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL), CUcontext(C_NULL))))
+@test (cuGraphAddMemsetNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL), CUcontext(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphMemsetNodeGetParams(): ", cuda_error_name(cuGraphMemsetNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL))))
+@test (cuGraphMemsetNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphMemsetNodeSetParams(): ", cuda_error_name(cuGraphMemsetNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL))))
+@test (cuGraphMemsetNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_MEMSET_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphAddHostNode(): ", cuda_error_name(cuGraphAddHostNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL))))
+@test (cuGraphAddHostNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphHostNodeGetParams(): ", cuda_error_name(cuGraphHostNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL))))
+@test (cuGraphHostNodeGetParams(CUgraphNode(C_NULL), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphHostNodeSetParams(): ", cuda_error_name(cuGraphHostNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL))))
+@test (cuGraphHostNodeSetParams(CUgraphNode(C_NULL), Ptr{CUDA_HOST_NODE_PARAMS}(C_NULL)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphAddChildGraphNode(): ", cuda_error_name(cuGraphAddChildGraphNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), CUgraph(C_NULL))))
+@test (cuGraphAddChildGraphNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0), CUgraph(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphChildGraphNodeGetGraph(): ", cuda_error_name(cuGraphChildGraphNodeGetGraph(CUgraphNode(C_NULL), Ptr{CUgraph}(C_NULL))))
+@test (cuGraphChildGraphNodeGetGraph(CUgraphNode(C_NULL), Ptr{CUgraph}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphAddEmptyNode(): ", cuda_error_name(cuGraphAddEmptyNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0))))
+@test (cuGraphAddEmptyNode(Ptr{CUgraphNode}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Csize_t(0)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphClone(): ", cuda_error_name(cuGraphClone(Ptr{CUgraph}(C_NULL), CUgraph(C_NULL))))
+@test (cuGraphClone(Ptr{CUgraph}(C_NULL), CUgraph(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphNodeFindInClone(): ", cuda_error_name(cuGraphNodeFindInClone(Ptr{CUgraphNode}(C_NULL), CUgraphNode(C_NULL), CUgraph(C_NULL))))
+@test (cuGraphNodeFindInClone(Ptr{CUgraphNode}(C_NULL), CUgraphNode(C_NULL), CUgraph(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphNodeGetType(): ", cuda_error_name(cuGraphNodeGetType(CUgraphNode(C_NULL), Ptr{CUgraphNodeType}(C_NULL))))
+@test (cuGraphNodeGetType(CUgraphNode(C_NULL), Ptr{CUgraphNodeType}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphGetNodes(): ", cuda_error_name(cuGraphGetNodes(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL))))
+@test (cuGraphGetNodes(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphGetRootNodes(): ", cuda_error_name(cuGraphGetRootNodes(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL))))
+@test (cuGraphGetRootNodes(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphGetEdges(): ", cuda_error_name(cuGraphGetEdges(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL))))
+@test (cuGraphGetEdges(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphNodeGetDependencies(): ", cuda_error_name(cuGraphNodeGetDependencies(CUgraphNode(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL))))
+@test (cuGraphNodeGetDependencies(CUgraphNode(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphNodeGetDependentNodes(): ", cuda_error_name(cuGraphNodeGetDependentNodes(CUgraphNode(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL))))
+@test (cuGraphNodeGetDependentNodes(CUgraphNode(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{Csize_t}(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphAddDependencies(): ", cuda_error_name(cuGraphAddDependencies(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), typemax(Csize_t))))
+@test (cuGraphAddDependencies(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), typemax(Csize_t)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphRemoveDependencies(): ", cuda_error_name(cuGraphRemoveDependencies(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), typemax(Csize_t))))
+@test (cuGraphRemoveDependencies(CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{CUgraphNode}(C_NULL), typemax(Csize_t)) == CUDA_ERROR_INVALID_VALUE)
+
+println("cuGraphDestroyNode(): ", cuda_error_name(cuGraphDestroyNode(CUgraphNode(C_NULL))))
+@test (cuGraphDestroyNode(CUgraphNode(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphInstantiate(): ", cuda_error_name(cuGraphInstantiate(Ptr{CUgraphExec}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{UInt8}(C_NULL), Csize_t(0))))
+@test (cuGraphInstantiate(Ptr{CUgraphExec}(C_NULL), CUgraph(C_NULL), Ptr{CUgraphNode}(C_NULL), Ptr{UInt8}(C_NULL), Csize_t(0)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphLaunch(): ", cuda_error_name(cuGraphLaunch(CUgraphExec(C_NULL), CUstream(C_NULL))))
+@test (cuGraphLaunch(CUgraphExec(C_NULL), CUstream(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphExecDestroy(): ", cuda_error_name(cuGraphExecDestroy(CUgraphExec(C_NULL))))
+@test (cuGraphExecDestroy(CUgraphExec(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
+
+println("cuGraphDestroy(): ", cuda_error_name(cuGraphDestroy(CUgraph(C_NULL))))
+@test (cuGraphDestroy(CUgraph(C_NULL)) == CUDA_ERROR_NOT_INITIALIZED)
 
 println("cuOccupancyMaxActiveBlocksPerMultiprocessor(): ", cuda_error_name(cuOccupancyMaxActiveBlocksPerMultiprocessor(Ptr{Cint}(C_NULL), CUfunction(C_NULL), Cint(0), Csize_t(0))))
 @test (cuOccupancyMaxActiveBlocksPerMultiprocessor(Ptr{Cint}(C_NULL), CUfunction(C_NULL), Cint(0), Csize_t(0)) == CUDA_ERROR_NOT_INITIALIZED)

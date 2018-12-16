@@ -26,6 +26,16 @@ cuDriverGetVersion(c_int_array)
 println("CUDA driver version: ", c_int_array[1])
 cuda_driver_version = c_int_array[1]
 
+# run CUDA library driver tests corresponding to the installed CUDA driver version
+include(@sprintf("%i.%i",
+                    Int(floor(0.01 * cuda_driver_version)),
+                    Int(floor(0.1 * (cuda_driver_version % 1000))))
+        * "/libcuda_"
+        * @sprintf("%i.%i",
+                    Int(floor(0.01 * cuda_driver_version)),
+                    Int(floor(0.1 * (cuda_driver_version % 1000))))
+        * "_function_tests.jl")
+
 let
     # Determine the latest installed CUDA toolkit version
     if (Sys.iswindows())
@@ -33,7 +43,6 @@ let
         local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
-    include(latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_function_tests.jl")
     include(latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_function_tests.jl")
 end
 
