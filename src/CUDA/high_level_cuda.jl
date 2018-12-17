@@ -284,6 +284,22 @@ end
 
 cuLinkCreate(numOptions::Integer, options::Array{CUjit_option, 1}, optionValues::Array) = cuLinkCreate(Cuint(numOptions), options, optionValues)
 
+function cuLinkAddData(state::CUlinkState, jitype::CUjitInputType, data::Array{UInt8, 1}, name::Array{UInt8, 1})::Nothing
+    local result::CUresult = cuLinkAddData(state, jitype, Base.unsafe_convert(Ptr{Nothing}, data), Csize_t(sizeof(data) + 1), Base.unsafe_convert(Ptr{UInt8}, name), Cuint(0), Ptr{CUjit_option}(C_NULL), Ptr{Ptr{Nothing}}(C_NULL))
+    @assert (result == CUDA_SUCCESS) ("cuLinkAddData() error: " * cuGetErrorString(result))
+    return nothing
+end
+
+cuLinkAddData(state::CUlinkState, jitype::CUjitInputType, data::String, name::String) = cuLinkAddData(state, jitype, map(UInt8, collect(data)), map(UInt8, collect(name)))
+
+function cuLinkAddFile(state::CUlinkState, jitype::CUjitInputType, path::Array{UInt8, 1})::Nothing
+    local result::CUresult = cuLinkAddFile(state, jitype, Base.unsafe_convert(Ptr{UInt8}, path), Cuint(0), Ptr{CUjit_option}(C_NULL), Ptr{Ptr{Nothing}}(C_NULL))
+    @assert (result == CUDA_SUCCESS) ("cuLinkAddFile() error: " * cuGetErrorString(result))
+    return nothing
+end
+
+cuLinkAddFile(state::CUlinkState, jitype::CUjitInputType, path::String) = cuLinkAddFile(state, jitype, map(UInt8, collect(path)))
+
 function cuLinkComplete(state::CUlinkState)::Array{UInt8, 1}
     local size_array::Array{Csize_t, 1} = zeros(Csize_t, 1)
     local cubin_ptr_array::Array{Ptr{Nothing}, 1} = [C_NULL]
