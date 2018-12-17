@@ -1,7 +1,9 @@
 #=*
 * CUDA runtime API v8.0 definitions
 *
-* Copyright (C) 2018 Qijia (Michael) Jin
+* Copyright (C) 2018 Blackbody Research LLC
+*       Author: Qijia (Michael) Jin
+*
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
