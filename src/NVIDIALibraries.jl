@@ -113,19 +113,26 @@ let
     include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_functions.jl")
 end
 
+export cublasGetErrorName
+
+include("CUBLAS/high_level_cublas.jl")
+
 end # CUBLAS
 
 module DeviceArray
 using ..CUDA
 using ..CUDARuntime
+using ..CUBLAS
 
 import Base: unsafe_copyto!, copyto!
 import NVIDIALibraries.CUDA.cuLaunchKernel
 import NVIDIALibraries.CUDARuntime.cudaLaunchKernel
+import NVIDIALibraries.CUBLAS.cublasSgemm
 
 export CUDAArray, deallocate!,
         unsafe_copyto!, copyto!,
-        cuLaunchKernel, cudaLaunchKernel
+        cuLaunchKernel, cudaLaunchKernel,
+        cublasSgemm
 
 include("cuda_array.jl")
 

@@ -211,3 +211,40 @@ end
 
     return result_expr
 end
+
+# use cublasSgemm_v2() over legacy cublasSgemm()
+function cublasSgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Array{Float32, 1}, A::CUDAArray, B::CUDAArray, beta::Array{Float32, 1}, C::CUDAArray)::Nothing
+    @assert ((A.element_type == Float32) &&
+            (B.element_type == Float32) &&
+            (C.element_type == Float32))
+    local transA::cublasOperation_t
+    local transB::cublasOperation_t
+    local m::Cint = Cint(C.size[1])
+    local n::Cint = Cint(C.size[2])
+    local k::Cint = Cint(A.size[2])
+    local lda::Cint, ldb::Cint
+    local ldc::Cint = m
+
+    if (ta == 'N')
+        transA = CUBLAS_OP_N
+        lda = m
+    elseif (ta == 'T')
+        transA = CUBLAS_OP_T
+        lda = k
+    elseif (ta == 'C')
+        transA = CUBLAS_OP_C
+        lda = k
+    end
+    if (tb == 'N')
+        transB = CUBLAS_OP_N
+        ldb = k
+    elseif (tb == 'T')
+        transB = CUBLAS_OP_T
+        ldb = n
+    elseif (tb == 'C')
+        transB = CUBLAS_OP_C
+        ldb = n
+    end
+    local result::cublasStatus_t = cublasSgemm_v2(handle, transA, transB, m, n, k, Base.unsafe_convert(Ptr{Float32}, alpha), Ptr{Float32}(A.ptr), lda, Ptr{Float32}(B.ptr), ldb, Base.unsafe_convert(Ptr{Float32}, beta), Ptr{Float32}(C.ptr), ldc)
+    @assert (result == cudaSuccess) ("cublasSgemm() error: " * cublasGetErrorName(result))
+end
