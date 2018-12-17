@@ -127,12 +127,12 @@ using ..CUBLAS
 import Base: unsafe_copyto!, copyto!
 import NVIDIALibraries.CUDA.cuLaunchKernel
 import NVIDIALibraries.CUDARuntime.cudaLaunchKernel
-import NVIDIALibraries.CUBLAS.cublasSgemm
+import NVIDIALibraries.CUBLAS: cublasHgemm, cublasSgemm, cublasDgemm
 
 export CUDAArray, deallocate!,
         unsafe_copyto!, copyto!,
         cuLaunchKernel, cudaLaunchKernel,
-        cublasSgemm
+        cublasHgemm, cublasSgemm, cublasDgemm
 
 include("cuda_array.jl")
 
