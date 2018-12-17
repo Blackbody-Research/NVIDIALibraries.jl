@@ -171,4 +171,41 @@ end
     return result_expr
 end
 
+@inline function cudaLaunchKernel(func::Ptr{Nothing}, grid::dim3, block::dim3, types::Tuple{Vararg{DataType}}, args...; kwargs...)
+    return cudaLaunchKernel(func, grid, block, Tuple{types...}, map(_cast_cudaarray_args, args)...; kwargs...)
+end
 
+@generated function cudaLaunchKernel(func::Ptr{Nothing}, grid::dim3, block::dim3, types::Type, args...; stream::cudaStream_t = cudaStream_t(C_NULL), shmem::Integer = 0, kwargs...)
+    local result_expr::Expr = Expr(:block)
+
+    push!(result_expr.args, Base.@_inline_meta)
+
+    args_types = types.parameters[1].parameters
+    args_syms = Array{Symbol, 1}(undef, length(args))
+    args_ptrs = Array{Symbol, 1}(undef, length(args))
+
+    for i in 1:length(args)
+        # assign safely referenced data to corresponding symbol
+        args_syms[i] = gensym()
+        push!(result_expr.args, :($(args_syms[i]) = Base.cconvert($(args_types[i]), args[$i])))
+        
+        # generate julia expressions to obtain 
+        args_ptrs[i] = gensym()
+        push!(result_expr.args, :($(args_ptrs[i]) = Base.unsafe_convert($(args_types[i]), $(args_syms[i]))))
+    end
+    
+    append!(result_expr.args, (quote
+        GC.@preserve $(args_syms...) begin
+            arguments::Array{Any, 1} = [$(args_ptrs...)]
+            result::cudaError_t = cudaLaunchKernel(func,
+                                grid,
+                                block,
+                                Base.unsafe_convert(Ptr{Ptr{Nothing}}, arguments),
+                                Csize_t(shmem),
+                                stream)
+            @assert (result == cudaSuccess) ("cudaLaunchKernel() error: " * unsafe_string(cudaGetErrorName(result)))
+        end
+    end).args)
+
+    return result_expr
+end

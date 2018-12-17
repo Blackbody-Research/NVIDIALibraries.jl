@@ -119,10 +119,11 @@ using ..CUDARuntime
 
 import Base: unsafe_copyto!, copyto!
 import NVIDIALibraries.CUDA.cuLaunchKernel
+import NVIDIALibraries.CUDARuntime.cudaLaunchKernel
 
 export CUDAArray, deallocate!,
         unsafe_copyto!, copyto!,
-        cuLaunchKernel
+        cuLaunchKernel, cudaLaunchKernel
 
 include("cuda_array.jl")
 
