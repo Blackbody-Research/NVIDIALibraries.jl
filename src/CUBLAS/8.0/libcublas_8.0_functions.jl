@@ -1154,6 +1154,26 @@ function cublasZhpr2_v2(handle::cublasHandle_t, uplo::cublasFillMode_t, n::Cint,
 end
 
 # CUBLAS BLAS level 3 functions
+function cublasSgemm_v2(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Cfloat, A::Ptr{Cfloat}, lda::Cint, B::Ptr{Cfloat}, ldb::Cint, beta::Cfloat, C::Ptr{Cfloat}, ldc::Cint)::cublasStatus_t
+    return ccall((:cublasSgemm_v2, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Cfloat}, Ptr{Cfloat}, Cint, Ptr{Cfloat}, Cint, Ref{Cfloat}, Ptr{Cfloat}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Cfloat}, alpha), A, lda, B, ldb, Base.cconvert(Ref{Cfloat}, beta), C, ldc)
+end
+
+function cublasDgemm_v2(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Cdouble, A::Ptr{Cdouble}, lda::Cint, B::Ptr{Cdouble}, ldb::Cint, beta::Cdouble, C::Ptr{Cdouble}, ldc::Cint)::cublasStatus_t
+    return ccall((:cublasDgemm_v2, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Cdouble}, Ptr{Cdouble}, Cint, Ptr{Cdouble}, Cint, Ref{Cdouble}, Ptr{Cdouble}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Cdouble}, alpha), A, lda, B, ldb, Base.cconvert(Ref{Cdouble}, beta), C, ldc)
+end
+
+function cublasCgemm_v2(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::cuComplex, A::Ptr{cuComplex}, lda::Cint, B::Ptr{cuComplex}, ldb::Cint, beta::cuComplex, C::Ptr{cuComplex}, ldc::Cint)::cublasStatus_t
+    return ccall((:cublasCgemm_v2, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{cuComplex}, Ptr{cuComplex}, Cint, Ptr{cuComplex}, Cint, Ref{cuComplex}, Ptr{cuComplex}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{cuComplex}, alpha), A, lda, B, ldb, Base.cconvert(Ref{cuComplex}, beta), C, ldc)
+end
+
+function cublasZgemm_v2(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::cuDoubleComplex, A::Ptr{cuDoubleComplex}, lda::Cint, B::Ptr{cuDoubleComplex}, ldb::Cint, beta::cuDoubleComplex, C::Ptr{cuDoubleComplex}, ldc::Cint)::cublasStatus_t
+    return ccall((:cublasZgemm_v2, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{cuDoubleComplex}, Ptr{cuDoubleComplex}, Cint, Ptr{cuDoubleComplex}, Cint, Ref{cuDoubleComplex}, Ptr{cuDoubleComplex}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{cuDoubleComplex}, alpha), A, lda, B, ldb, Base.cconvert(Ref{cuDoubleComplex}, beta), C, ldc)
+end
+
+function cublasHgemm(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::__half, A::Ptr{__half}, lda::Cint, B::Ptr{__half}, ldb::Cint, beta::__half, C::Ptr{__half}, ldc::Cint)::cublasStatus_t
+    return ccall((:cublasHgemm, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{__half}, Ptr{__half}, Cint, Ptr{__half}, Cint, Ref{__half}, Ptr{__half}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{__half}, alpha), A, lda, B, ldb, Base.cconvert(Ref{__half}, beta), C, ldc)
+end
+
 function cublasSgemm_v2(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Array{Cfloat, 1}, A::Array{Cfloat, 1}, lda::Cint, B::Array{Cfloat, 1}, ldb::Cint, beta::Array{Cfloat, 1}, C::Array{Cfloat, 1}, ldc::Cint)::cublasStatus_t
     return ccall((:cublasSgemm_v2, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Cfloat}, Ref{Cfloat}, Cint, Ref{Cfloat}, Cint, Ref{Cfloat}, Ref{Cfloat}, Cint,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Cfloat}, alpha), Base.cconvert(Ref{Cfloat}, A), lda, Base.cconvert(Ref{Cfloat}, B), ldb, Base.cconvert(Ref{Cfloat}, beta), Base.cconvert(Ref{Cfloat}, C), ldc)
 end
