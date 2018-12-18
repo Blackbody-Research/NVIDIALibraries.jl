@@ -20,8 +20,10 @@
 using Libdl
 
 if (Sys.iswindows())
-	const libcuda = Libdl.find_library(["nvcuda"])
+    const libcuda = Libdl.find_library(["nvcuda"])
+elseif (Sys.isapple())
+    const libcuda = Libdl.find_library(["libcuda"], ["/usr/local/cuda/lib/"])
 else
-	const libcuda = Libdl.find_library(["libcuda"])
+    const libcuda = Libdl.find_library(["libcuda"])
 end
 

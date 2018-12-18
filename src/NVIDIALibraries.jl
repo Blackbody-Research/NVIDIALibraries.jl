@@ -28,9 +28,15 @@ include("load_cuda.jl")
 
 let
     # Determine the latest installed CUDA toolkit version
+    local latest_cuda_version::VersionNumber
+    local latest_cuda_version_string::String
+
     if (Sys.iswindows())
-        local latest_cuda_version::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
-        local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.isapple())
+        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
     include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_exports.jl")
@@ -68,9 +74,15 @@ include("load_cudart.jl")
 
 let
     # Determine the latest installed CUDA toolkit version
+    local latest_cuda_version::VersionNumber
+    local latest_cuda_version_string::String
+
     if (Sys.iswindows())
-        local latest_cuda_version::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
-        local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.isapple())
+        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
     include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_exports.jl")
@@ -102,9 +114,15 @@ include("load_cublas.jl")
 
 let
     # Determine the latest installed CUDA toolkit version
+    local latest_cuda_version::VersionNumber
+    local latest_cuda_version_string::String
+
     if (Sys.iswindows())
-        local latest_cuda_version::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
-        local latest_cuda_version_string::String = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.isapple())
+        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 
     include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_exports.jl")

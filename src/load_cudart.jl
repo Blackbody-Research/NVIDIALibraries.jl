@@ -20,9 +20,22 @@
 using Libdl
 using Printf
 
+# find the most up to date version of CUDA Toolkit installed
+local latest::VersionNumber
+
 if (Sys.iswindows())
-	# find the most up to date version of CUDA Toolkit installed
-	@assert (length(readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")) != 0)
-	local latest::VersionNumber = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")))
-	const libcudart = Libdl.find_library([@sprintf("cudart%i_%i%i", Sys.WORD_SIZE, latest.major, latest.minor)], [@sprintf("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v%i.%i\\bin", latest.major, latest.minor)])
+    @assert (length(readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")) != 0)
+    latest = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\")))
+    const libcudart = Libdl.find_library([@sprintf("cudart%i_%i%i", Sys.WORD_SIZE, latest.major, latest.minor)],
+                                        [@sprintf("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v%i.%i\\bin", latest.major, latest.minor)])
+elseif (Sys.isapple())
+    @assert (length(readdir("/Developer/NVIDIA/")) != 0)
+    latest = reduce(max,
+                    map(VersionNumber,
+                        map((function(name::String)
+                                return name[6:end]
+                            end),
+                            readdir("/Developer/NVIDIA/"))))
+    const libcudart = Libdl.find_library([@sprintf("libcudart.%i.%i", latest.major, latest.minor)],
+                                        [@sprintf("/Developer/NVIDIA/CUDA-%i.%i/lib/", latest.major, latest.minor)])
 end
