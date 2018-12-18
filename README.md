@@ -16,7 +16,7 @@ Enter the Pkg REPL-mode from the Julia REPL by using the key `]`.
 
 Now add the Julia package by using the `add` command:
 ```
-add https://github.com/mikhail-j/NVIDIALibraries.jl
+add https://github.com/Blackbody-Research/NVIDIALibraries.jl
 ```
 
 ## How are CUDA device arrays managed?
