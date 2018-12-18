@@ -337,11 +337,17 @@ struct float2
     x::Cfloat
     y::Cfloat
 end
+float2(r_num::T) where {T <: Real} = float2(Cfloat(r_num), Cfloat(0))
+float2(c_num::T) where {T <: Complex} = float2(Cfloat(c_num.re), Cfloat(c_num.im))
+
 # float2 is aligned by 8 bytes
 align_struct(float2, 8)
 
 Base.zero(::Type{float2}) = float2(Cfloat(0), Cfloat(0))
 Base.zero(x::float2) = zero(typeof(x))
+
+Base.one(::Type{float2}) = float2(Cfloat(1), Cfloat(0))
+Base.one(x::float2) = one(typeof(x))
 
 struct float3
     x::Cfloat
@@ -445,11 +451,16 @@ struct double2
     x::Cdouble
     y::Cdouble
 end
+double2(r_num::T) where {T <: Real} = double2(Cdouble(r_num), Cdouble(0))
+double2(c_num::T) where {T <: Complex} = double2(Cdouble(c_num.re), Cdouble(c_num.im))
 # double2 is aligned by 16 bytes
 align_struct(double2, 16)
 
 Base.zero(::Type{double2}) = double2(Cdouble(0), Cdouble(0))
 Base.zero(x::double2) = zero(typeof(x))
+
+Base.one(::Type{double2}) = double2(Cdouble(1), Cdouble(0))
+Base.one(x::double2) = one(typeof(x))
 
 struct double3
     x::Cdouble
