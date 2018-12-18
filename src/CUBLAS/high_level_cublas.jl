@@ -43,3 +43,10 @@ function cublasGetErrorName(error_status::cublasStatus_t)::String
     end
 end
 
+function cublasCreate_v2()::cublasHandle_t
+    local handle_array::Array{cublasHandle_t, 1} = [C_NULL]
+    local result::cublasStatus_t = cublasCreate_v2(handle_array)
+    @assert (result == CUBLAS_STATUS_SUCCESS) ("cublasCreate_v2() error: " * cublasGetErrorName(result))
+    return pop!(handle_array)
+end
+

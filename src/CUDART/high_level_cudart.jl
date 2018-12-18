@@ -17,6 +17,20 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
+function cudaStreamCreate()::cudaStream_t
+    local stream_array::Array{cudaStream_t, 1} = [C_NULL]
+    local result::cudaError_t = cudaStreamCreate(stream_array)
+    @assert (result == cudaSuccess) ("cudaStreamCreate() error: " * unsafe_string(cudaGetErrorString(result)))
+    return pop!(stream_array)
+end
+
+function cudaStreamCreateWithFlags(flags::Cuint)::cudaStream_t
+    local stream_array::Array{cudaStream_t, 1} = [C_NULL]
+    local result::cudaError_t = cudaStreamCreateWithFlags(stream_array, flags)
+    @assert (result == cudaSuccess) ("cudaStreamCreateWithFlags() error: " * unsafe_string(cudaGetErrorString(result)))
+    return pop!(stream_array)
+end
+
 cudaMalloc(devPtr::Array{Ptr{Cvoid}, 1}, size::Integer) = cudaMalloc(Base.unsafe_convert(Ptr{Ptr{Nothing}}, devPtr), Csize_t(size))
 cudaMalloc(devPtr::Ptr{Ptr{Cvoid}}, size::Integer) = cudaMalloc(devPtr, Csize_t(size))
 
