@@ -323,33 +323,33 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
 end
 
 function get_cuda_datatype(dt::DataType)::cudaDataType
-    if (dt == __half)
+    if (dt === __half)
         return CUDA_R_16F
-    elseif (dt == __half2)
+    elseif (dt === __half2)
         return CUDA_C_16F
-    elseif (dt == Float32)
+    elseif (dt === Float32)
         return CUDA_R_32F
-    elseif (dt == cuFloatComplex)
+    elseif (dt === cuFloatComplex)
         return CUDA_C_32F
-    elseif (dt == Float64)
+    elseif (dt === Float64)
         return CUDA_R_64F
-    elseif (dt == cuDoubleComplex)
+    elseif (dt === cuDoubleComplex)
         return CUDA_C_64F
-    elseif (dt == Int8)
+    elseif (dt === Int8)
         return CUDA_R_8I
-    elseif (dt == char2)
+    elseif (dt === char2)
         return CUDA_C_8I
-    elseif (dt == UInt8)
+    elseif (dt === UInt8)
         return CUDA_R_8U
-    elseif (dt == uchar2)
+    elseif (dt === uchar2)
         return CUDA_C_8U
-    elseif (dt == Int32)
+    elseif (dt === Int32)
         return CUDA_R_32I
-    elseif (dt == int2)
+    elseif (dt === int2)
         return CUDA_C_32I
-    elseif (dt == UInt32)
+    elseif (dt === UInt32)
         return CUDA_R_32U
-    elseif (dt == uint2)
+    elseif (dt === uint2)
         return CUDA_C_32U
     else
         error("get_cuda_datatype() error: could not find corresponding cudaDataType for ", dt, "!")
