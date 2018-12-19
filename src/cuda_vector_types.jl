@@ -47,11 +47,17 @@ struct char2
     x::Cchar
     y::Cchar
 end
+char2(r_num::T) where {T <: Real} = char2(Cchar(r_num), Cchar(0))
+char2(c_num::T) where {T <: Complex} = char2(Cchar(c_num.re), Cchar(c_num.im))
+
 # char2 is aligned by 2 bytes
 align_struct(char2, 2)
 
 Base.zero(::Type{char2}) = char2(Cchar(0), Cchar(0))
 Base.zero(x::char2) = zero(typeof(x))
+
+Base.one(::Type{char2}) = char2(Cchar(1), Cchar(0))
+Base.one(x::char2) = one(typeof(x))
 
 struct uchar2
     x::Cuchar
