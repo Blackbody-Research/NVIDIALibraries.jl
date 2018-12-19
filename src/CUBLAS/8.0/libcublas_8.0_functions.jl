@@ -1246,6 +1246,32 @@ function cublasSgemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb
     return ccall((:cublasSgemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ptr{Cfloat}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cfloat}, Ptr{Cvoid}, cudaDataType, Cint,), handle, transa, transb, m, n, k, alpha, A, Atype, lda, B, Btype, ldb, beta, C, Ctype, ldc)
 end
 
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Float16, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::Float16, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Float16}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{Float16}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Float16}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{Float16}, beta), C, Ctype, ldc, computeType, algo)
+end
+
+# alpha and beta scalars can only have values Int32(0) or Int32(1)
+# read https://docs.nvidia.com/cuda/archive/9.0/cublas/index.html#cublas-GemmEx
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Int32, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::Int32, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Int32}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{Int32}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Int32}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{Int32}, beta), C, Ctype, ldc, computeType, algo)
+end
+
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Float32, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::Float32, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Float32}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{Float32}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Float32}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{Float32}, beta), C, Ctype, ldc, computeType, algo)
+end
+
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Float64, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::Float64, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{Float64}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{Float64}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{Float64}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{Float64}, beta), C, Ctype, ldc, computeType, algo)
+end
+
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::cuFloatComplex, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::cuFloatComplex, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{cuFloatComplex}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{cuFloatComplex}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{cuFloatComplex}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{cuFloatComplex}, beta), C, Ctype, ldc, computeType, algo)
+end
+
+function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::cuDoubleComplex, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::cuDoubleComplex, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
+    return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ref{cuDoubleComplex}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ref{cuDoubleComplex}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, Base.cconvert(Ref{cuDoubleComplex}, alpha), A, Atype, lda, B, Btype, ldb, Base.cconvert(Ref{cuDoubleComplex}, beta), C, Ctype, ldc, computeType, algo)
+end
+
 function cublasGemmEx(handle::cublasHandle_t, transa::cublasOperation_t, transb::cublasOperation_t, m::Cint, n::Cint, k::Cint, alpha::Ptr{Cvoid}, A::Ptr{Cvoid}, Atype::cudaDataType, lda::Cint, B::Ptr{Cvoid}, Btype::cudaDataType, ldb::Cint, beta::Ptr{Cvoid}, C::Ptr{Cvoid}, Ctype::cudaDataType, ldc::Cint, computeType::cudaDataType, algo::cublasGemmAlgo_t)::cublasStatus_t
     return ccall((:cublasGemmEx, libcublas), cublasStatus_t, (cublasHandle_t, cublasOperation_t, cublasOperation_t, Cint, Cint, Cint, Ptr{Cvoid}, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, cudaDataType, Cint, Ptr{Cvoid}, Ptr{Cvoid}, cudaDataType, Cint, cudaDataType, cublasGemmAlgo_t,), handle, transa, transb, m, n, k, alpha, A, Atype, lda, B, Btype, ldb, beta, C, Ctype, ldc, computeType, algo)
 end
