@@ -16,13 +16,13 @@ Enter the Pkg REPL-mode from the Julia REPL by using the key `]`.
 
 Now add the Julia package by using the `add` command:
 ```
-add https://github.com/Blackbody-Research/NVIDIALibraries.jl
+(v1.0) pkg> add https://github.com/Blackbody-Research/NVIDIALibraries.jl
 ```
 
 ## How are CUDA device arrays managed?
 The `CUDAArray` datatype uses the CUDA Runtime library to allocate and free GPU device memory.
 
-CUDAArrays can be constructed with initial values by passing a Julia array to `CUDAArray()`.
+CUDAArrays can be constructed with initial values by passing a Julia array to `cuda_allocate(::Array)`.
 
 In addition, CUDAArrays can be explicitly freed by calling `deallocate!(::CUDAArray)`.
 
@@ -50,12 +50,10 @@ Then, load the kernel from the new cubin image as a CUDA module.
 example_module = cuModuleLoadData(Base.unsafe_convert(Ptr{Nothing}, cubin_array))
 ```
 
-## What should I do if I recently installed or uninstalled a newer CUDA Toolkit version?
-For systems with multiple CUDA Toolkit versions installed, please manually precompile this module in order for it to recognize the new library paths.
-
-Manual precompilation of NVIDIALibraries.jl can be done with the following command:
+## What should I do if I want to update NVIDIALibraries.jl?
+The `update` command in Pkg REPL-mode can be used to add recent commits made to NVIDIALibraries.jl:
 ```julia
-Base.compilecache(Base.identify_package("NVIDIALibraries"))
+(v1.0) pkg> update NVIDIALibraries
 ```
 
 ## License
