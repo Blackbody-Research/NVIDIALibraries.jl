@@ -19,7 +19,7 @@
 
 module NVIDIALibraries
 
-export @using_nvidialib_settings
+export @using_nvidialib_settings, get_cuda_toolkit_versions
 
 module DeviceArray
 export CUDAArray
@@ -399,6 +399,21 @@ macro using_nvidialib_settings(filename::String)
                         for i in collect(map(Symbol, i)
                                         for i in collect(split(i, ".")
                                                         for i in get_nvlib_settings(filename))))...)
+end
+
+# return available CUDA Toolkit versions in no particular order
+function get_cuda_toolkit_versions()::Array{VersionNumber, 1}
+    # Determine installed CUDA toolkit versions
+    if (Sys.iswindows())
+        return map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA"))
+    elseif (Sys.isapple())
+        return map(VersionNumber, map((function(name::String)
+                                            return name[6:end]
+                                        end),
+                                        readdir("/Developer/NVIDIA/")))
+    else
+        error("get_cuda_toolkit_versions() error: unexpected operating system!")
+    end
 end
 
 end
