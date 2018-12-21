@@ -19,35 +19,14 @@
 
 module NVIDIALibraries
 
-export CUDAArray, deallocate!
+export @using_nvidialib_settings
 
-module CUDA
-using Printf
+module DeviceArray
+export CUDAArray
 
-include("load_cuda.jl")
+include("cuda_array.jl")
 
-let
-    # Determine the latest installed CUDA toolkit version
-    local latest_cuda_version::VersionNumber
-    local latest_cuda_version_string::String
-
-    if (Sys.iswindows())
-        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
-        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
-    elseif (Sys.isapple())
-        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
-        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
-    end
-
-    include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_exports.jl")
-
-    include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_constants.jl")
-    include("CUDA/" * latest_cuda_version_string * "/libcuda_" * latest_cuda_version_string * "_functions.jl")
-end
-
-include("CUDA/high_level_cuda.jl")
-
-end # CUDA
+end # DeviceArray
 
 module VectorTypes
 
@@ -62,102 +41,364 @@ include("cuda_complex.jl")
 
 end # ComplexTypes
 
-module CUDARuntime
-using ..CUDA
-using ..VectorTypes
-using Printf
+module CUDA_8_0
+    using ..DeviceArray
+    using ..VectorTypes
 
+    include("load_cuda.jl")
+    include("CUDA/8.0/libcuda_8.0_exports.jl")
+    include("CUDA/8.0/libcuda_8.0_constants.jl")
+    include("CUDA/8.0/libcuda_8.0_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 8.0
+
+module CUDA_9_0
+    using ..DeviceArray
+    using ..VectorTypes
+
+    include("load_cuda.jl")
+    include("CUDA/9.0/libcuda_9.0_exports.jl")
+    include("CUDA/9.0/libcuda_9.0_constants.jl")
+    include("CUDA/9.0/libcuda_9.0_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 9.0
+
+module CUDA_9_1
+    using ..DeviceArray
+    using ..VectorTypes
+
+    include("load_cuda.jl")
+    include("CUDA/9.1/libcuda_9.1_exports.jl")
+    include("CUDA/9.1/libcuda_9.1_constants.jl")
+    include("CUDA/9.1/libcuda_9.1_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 9.1
+
+module CUDA_9_2
+    using ..DeviceArray
+    using ..VectorTypes
+
+    include("load_cuda.jl")
+    include("CUDA/9.2/libcuda_9.2_exports.jl")
+    include("CUDA/9.2/libcuda_9.2_constants.jl")
+    include("CUDA/9.2/libcuda_9.2_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 9.2
+
+module CUDA_10_0
+    using ..DeviceArray
+    using ..VectorTypes
+
+    include("load_cuda.jl")
+    include("CUDA/10.0/libcuda_10.0_exports.jl")
+    include("CUDA/10.0/libcuda_10.0_constants.jl")
+    include("CUDA/10.0/libcuda_10.0_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 10.0
+
+module CUDARuntime_8_0
+using ..CUDA_8_0
+using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-
 include("load_cudart.jl")
-
-let
-    # Determine the latest installed CUDA toolkit version
-    local latest_cuda_version::VersionNumber
-    local latest_cuda_version_string::String
-
-    if (Sys.iswindows())
-        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
-        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
-    elseif (Sys.isapple())
-        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
-        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
-    end
-
-    include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_exports.jl")
-
-    include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_constants.jl")
-    include("CUDART/" * latest_cuda_version_string * "/libcudart_" * latest_cuda_version_string * "_functions.jl")
-end
-
+include("CUDART/8.0/libcudart_8.0_exports.jl")
+include("CUDART/8.0/libcudart_8.0_constants.jl")
+include("CUDART/8.0/libcudart_8.0_functions.jl")
 include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 8.0
 
-end # Runtime
+module CUDARuntime_9_0
+using ..CUDA_9_0
+using ..VectorTypes
+# CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
+include("load_cudart.jl")
+include("CUDART/9.0/libcudart_9.0_exports.jl")
+include("CUDART/9.0/libcudart_9.0_constants.jl")
+include("CUDART/9.0/libcudart_9.0_functions.jl")
+include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 9.0
 
-module CUBLAS
-using ..CUDA
-using ..CUDARuntime
+module CUDARuntime_9_1
+using ..CUDA_9_1
+using ..VectorTypes
+# CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
+include("load_cudart.jl")
+include("CUDART/9.1/libcudart_9.1_exports.jl")
+include("CUDART/9.1/libcudart_9.1_constants.jl")
+include("CUDART/9.1/libcudart_9.1_functions.jl")
+include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 9.1
+
+module CUDARuntime_9_2
+using ..CUDA_9_2
+using ..VectorTypes
+# CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
+include("load_cudart.jl")
+include("CUDART/9.2/libcudart_9.2_exports.jl")
+include("CUDART/9.2/libcudart_9.2_constants.jl")
+include("CUDART/9.2/libcudart_9.2_functions.jl")
+include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 9.2
+
+module CUDARuntime_10_0
+using ..CUDA_10_0
+using ..VectorTypes
+# CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
+include("load_cudart.jl")
+include("CUDART/10.0/libcudart_10.0_exports.jl")
+include("CUDART/10.0/libcudart_10.0_constants.jl")
+include("CUDART/10.0/libcudart_10.0_functions.jl")
+include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 10.0
+
+module CUBLAS_8_0
+using ..CUDA_8_0
+using ..CUDARuntime_8_0
 using ..VectorTypes
 using ..ComplexTypes
-using Printf
-
+using ..DeviceArray
 # CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
-
 # Export CUDA Complex and vector types from the CUBLAS module
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
-
 include("cuda_library_types.jl")
-
 include("load_cublas.jl")
+include("CUBLAS/8.0/libcublas_8.0_exports.jl")
+include("CUBLAS/8.0/libcublas_8.0_constants.jl")
+include("CUBLAS/8.0/libcublas_8.0_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 8.0
 
-let
+module CUBLAS_9_0
+using ..CUDA_9_0
+using ..CUDARuntime_9_0
+using ..VectorTypes
+using ..ComplexTypes
+using ..DeviceArray
+# CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
+include("cuda_library_types.jl")
+include("load_cublas.jl")
+include("CUBLAS/9.0/libcublas_9.0_exports.jl")
+include("CUBLAS/9.0/libcublas_9.0_constants.jl")
+include("CUBLAS/9.0/libcublas_9.0_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 9.0
+
+module CUBLAS_9_1
+using ..CUDA_9_1
+using ..CUDARuntime_9_1
+using ..VectorTypes
+using ..ComplexTypes
+using ..DeviceArray
+# CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
+include("cuda_library_types.jl")
+include("load_cublas.jl")
+include("CUBLAS/9.1/libcublas_9.1_exports.jl")
+include("CUBLAS/9.1/libcublas_9.1_constants.jl")
+include("CUBLAS/9.1/libcublas_9.1_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 9.1
+
+module CUBLAS_9_2
+using ..CUDA_9_2
+using ..CUDARuntime_9_2
+using ..VectorTypes
+using ..ComplexTypes
+using ..DeviceArray
+# CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
+include("cuda_library_types.jl")
+include("load_cublas.jl")
+include("CUBLAS/9.2/libcublas_9.2_exports.jl")
+include("CUBLAS/9.2/libcublas_9.2_constants.jl")
+include("CUBLAS/9.2/libcublas_9.2_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 9.2
+
+module CUBLAS_10_0
+using ..CUDA_10_0
+using ..CUDARuntime_10_0
+using ..VectorTypes
+using ..ComplexTypes
+using ..DeviceArray
+# CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
+include("cuda_library_types.jl")
+include("load_cublas.jl")
+include("CUBLAS/10.0/libcublas_10.0_exports.jl")
+include("CUBLAS/10.0/libcublas_10.0_constants.jl")
+include("CUBLAS/10.0/libcublas_10.0_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 10.0
+
+using Printf
+
+function set_default_nvlib_settings()
+    local file::IOStream = open("nvlib_julia.conf", "w")
+    write(file, ("# NVIDIALibraries.jl settings for importing submodules\n"
+                * "# each line must have a colon delimiter\n\n"))
+    local mods::Array{String, 1} = Array{String, 1}(["NVIDIALibraries.CUDA",
+                                    "NVIDIALibraries.CUDARuntime",
+                                    "NVIDIALibraries.CUBLAS"])
     # Determine the latest installed CUDA toolkit version
     local latest_cuda_version::VersionNumber
     local latest_cuda_version_string::String
-
     if (Sys.iswindows())
         latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
         latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     elseif (Sys.isapple())
-        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String) return name[6:end] end), readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String)
+                                                                        return name[6:end]
+                                                                    end),
+                                                                    readdir("/Developer/NVIDIA/"))))
         latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
-
-    include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_exports.jl")
-
-    include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_constants.jl")
-    include("CUBLAS/" * latest_cuda_version_string * "/libcublas_" * latest_cuda_version_string * "_functions.jl")
+    for mod in mods
+        write(file, (mod * ": " * latest_cuda_version_string * "\n"))
+    end
+    flush(file)
+    close(file)
+    return nothing
 end
 
-export cublasGetErrorName
+function set_default_nvlib_settings(fn::String)
+    local file::IOStream = open(fn, "w")
+    write(file, ("# NVIDIALibraries.jl settings for importing submodules\n"
+                * "# each line must have a colon delimiter\n\n"))
+    local mods::Array{String, 1} = Array{String, 1}(["NVIDIALibraries.CUDA",
+                                    "NVIDIALibraries.CUDARuntime",
+                                    "NVIDIALibraries.CUBLAS"])
+    # Determine the latest installed CUDA toolkit version
+    local latest_cuda_version::VersionNumber
+    local latest_cuda_version_string::String
+    if (Sys.iswindows())
+        latest_cuda_version = reduce(max, map(VersionNumber, readdir("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA")))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.isapple())
+        latest_cuda_version = reduce(max, map(VersionNumber, map((function(name::String)
+                                                                        return name[6:end]
+                                                                    end),
+                                                                    readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    end
+    for mod in mods
+        write(file, (mod * ": " * latest_cuda_version_string * "\n"))
+    end
+    flush(file)
+    close(file)
+    return nothing
+end
 
-include("CUBLAS/high_level_cublas.jl")
+function get_nvlib_settings()::Array{String, 1}
+    local file::IOStream = open("nvlib_julia.conf", "r")
+    local mods::Array{String, 1} = Array{String, 1}()
+    local lib_name::String
+    local colon_count::Int
+    local ver_num::VersionNumber
+    local line_number::Int = 1
+    while (!eof(file))
+        local line::String = readline(file)
+        if ((length(strip(line)) > 0) && (line[1] !== '#'))
+            if (!occursin(",", line))
+                if (occursin(":", line))
+                    colon_count = count(i->(i === ':'), line)
+                    @assert (colon_count == 1) ("get_nvlib_settings() error: found "
+                                                * string(colon_count) * " colons in line "
+                                                * string(line_number) * "!")
+                    local mod_str_array::Array{String, 1} = map(String, split(line, ":"))
+                    lib_name = strip(popfirst!(mod_str_array))
+                    ver_num = VersionNumber(strip(popfirst!(mod_str_array)))
+                    if (lib_name in ("NVIDIALibraries.CUDA",
+                                    "NVIDIALibraries.CUDARuntime",
+                                    "NVIDIALibraries.CUBLAS"))
+                        push!(mods, (@sprintf("%s_%i_%i", lib_name, ver_num.major, ver_num.minor)))
+                    end
+                else
+                    error("get_nvlib_settings() error: expected ':' in line " * string(line_number) * "!")
+                end
+            else
+                error("get_nvlib_settings() error: found invalid character ',' in line " * string(line_number) * "!")
+            end
+        end
+        line_number = line_number + 1
+    end
+    close(file)
+    return mods
+end
 
-end # CUBLAS
+function get_nvlib_settings(fn::String)::Array{String, 1}
+    @assert (fn !== "") ("get_nvlib_settings() error: filename can't be an empty string!")
+    local file::IOStream = open("nvlib_julia.conf", "r")
+    local mods::Array{String, 1} = Array{String, 1}()
+    local lib_name::String
+    local colon_count::Int
+    local ver_num::VersionNumber
+    local line_number::Int = 1
+    while (!eof(file))
+        local line::String = readline(file)
+        if ((length(strip(line)) > 0) && (line[1] !== '#'))
+            if (!occursin(",", line))
+                if (occursin(":", line))
+                    colon_count = count(i->(i === ':'), line)
+                    @assert (colon_count == 1) ("get_nvlib_settings() error: found "
+                                                * string(colon_count) * " colons in line "
+                                                * string(line_number) * "!")
+                    local mod_str_array::Array{String, 1} = map(String, split(line, ":"))
+                    lib_name = strip(popfirst!(mod_str_array))
+                    ver_num = VersionNumber(strip(popfirst!(mod_str_array)))
+                    if (lib_name in ("NVIDIALibraries.CUDA",
+                                    "NVIDIALibraries.CUDARuntime",
+                                    "NVIDIALibraries.CUBLAS"))
+                        push!(mods, (@sprintf("%s_%i_%i", lib_name, ver_num.major, ver_num.minor)))
+                    end
+                else
+                    error("get_nvlib_settings() error: expected ':' in line " * string(line_number) * "!")
+                end
+            else
+                error("get_nvlib_settings() error: found invalid character ',' in line " * string(line_number) * "!")
+            end
+        end
+        line_number = line_number + 1
+    end
+    close(file)
+    return mods
+end
 
-module DeviceArray
-using ..CUDA
-using ..CUDARuntime
-using ..CUBLAS
+macro using_nvidialib_settings()
+    if (!isfile("nvlib_julia.conf"))
+        set_default_nvlib_settings()
+    end
+    return Expr(:block,
+                collect(Expr(:using, Expr(:., i...))
+                        for i in collect(map(Symbol, i)
+                                        for i in collect(split(i, ".")
+                                                        for i in get_nvlib_settings())))...)
+end
 
-import Base: unsafe_copyto!, copyto!
-import NVIDIALibraries.CUDA.cuLaunchKernel
-import NVIDIALibraries.CUDARuntime.cudaLaunchKernel
-import NVIDIALibraries.CUBLAS: cublasHgemm, cublasSgemm, cublasDgemm,
-                            cublasGemmEx
-
-export CUDAArray, deallocate!,
-        unsafe_copyto!, copyto!,
-        cuLaunchKernel, cudaLaunchKernel,
-        cublasHgemm, cublasSgemm, cublasDgemm,
-        cublasGemmEx
-
-include("cuda_array.jl")
-
-end # DeviceArray
-
-using .DeviceArray
+macro using_nvidialib_settings(filename::String)
+    if (!isfile(filename))
+        set_default_nvlib_settings(filename)
+    end
+    return Expr(:block,
+                collect(Expr(:using, Expr(:., i...))
+                        for i in collect(map(Symbol, i)
+                                        for i in collect(split(i, ".")
+                                                        for i in get_nvlib_settings(filename))))...)
+end
 
 end

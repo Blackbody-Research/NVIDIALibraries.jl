@@ -20,8 +20,9 @@
 using Test
 using Printf
 
-using NVIDIALibraries.CUDA
-using NVIDIALibraries.CUDARuntime
+using NVIDIALibraries
+
+@using_nvidialib_settings()
 
 c_int_array = zeros(Cint, 1)
 cuDriverGetVersion(c_int_array)
