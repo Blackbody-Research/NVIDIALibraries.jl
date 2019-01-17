@@ -21,7 +21,7 @@ using Test
 using Printf
 
 using NVIDIALibraries
-
+6
 @using_nvidialib_settings()
 
 c_int_array = zeros(Cint, 1)
@@ -51,6 +51,15 @@ let
                                                                         return name[6:end]
                                                                     end),
                                                                     readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.islinux())
+        latest_cuda_version = reduce(max,
+                                    map(VersionNumber,
+                                        map((function(name::String)
+                                                return name[6:end]
+                                            end),
+                                            collect(i for i in readdir("/usr/local/")
+                                                    if occursin("cuda-", i)))))
         latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
 

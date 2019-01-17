@@ -267,6 +267,15 @@ function set_default_nvlib_settings()
                                                                     end),
                                                                     readdir("/Developer/NVIDIA/"))))
         latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.islinux())
+        latest_cuda_version = reduce(max,
+                                    map(VersionNumber,
+                                        map((function(name::String)
+                                                return name[6:end]
+                                            end),
+                                            collect(i for i in readdir("/usr/local/")
+                                                    if occursin("cuda-", i)))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
     for mod in mods
         write(file, (mod * ": " * latest_cuda_version_string * "\n"))
@@ -294,6 +303,15 @@ function set_default_nvlib_settings(fn::String)
                                                                         return name[6:end]
                                                                     end),
                                                                     readdir("/Developer/NVIDIA/"))))
+        latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
+    elseif (Sys.islinux())
+        latest_cuda_version = reduce(max,
+                                    map(VersionNumber,
+                                        map((function(name::String)
+                                                return name[6:end]
+                                            end),
+                                            collect(i for i in readdir("/usr/local/")
+                                                    if occursin("cuda-", i)))))
         latest_cuda_version_string = @sprintf("%i.%i", latest_cuda_version.major, latest_cuda_version.minor)
     end
     for mod in mods

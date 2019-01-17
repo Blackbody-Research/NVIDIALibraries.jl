@@ -36,4 +36,19 @@ elseif (Sys.isapple())
                             readdir("/Developer/NVIDIA/"))))
     const libcublas = Libdl.find_library([@sprintf("libcublas.%i.%i", latest.major, latest.minor)],
                                         [@sprintf("/Developer/NVIDIA/CUDA-%i.%i/lib/", latest.major, latest.minor)])
+elseif (Sys.islinux())
+    @assert (length(readdir("/usr/local/")) != 0)
+    latest = reduce(max,
+                    map(VersionNumber,
+                        map((function(name::String)
+                                return name[6:end]
+                            end),
+                            collect(i for i in readdir("/usr/local/") if occursin("cuda-", i)))))
+    if (Sys.WORD_SIZE == 32)
+        const libcublas = Libdl.find_library(["libcublas"],
+                                            [@sprintf("/usr/local/cuda-%i.%i/lib/", latest.major, latest.minor)])
+    elseif (Sys.WORD_SIZE == 64)
+        const libcublas = Libdl.find_library(["libcublas"],
+                                            [@sprintf("/usr/local/cuda-%i.%i/lib64/", latest.major, latest.minor)])
+    end
 end
