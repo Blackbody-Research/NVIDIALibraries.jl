@@ -101,7 +101,7 @@ using ..CUDA_8_0
 using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-include("load_cudart.jl")
+include("CUDART/8.0/load_cudart_8.0.jl")
 include("CUDART/8.0/libcudart_8.0_exports.jl")
 include("CUDART/8.0/libcudart_8.0_constants.jl")
 include("CUDART/8.0/libcudart_8.0_functions.jl")
@@ -113,7 +113,7 @@ using ..CUDA_9_0
 using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-include("load_cudart.jl")
+include("CUDART/9.0/load_cudart_9.0.jl")
 include("CUDART/9.0/libcudart_9.0_exports.jl")
 include("CUDART/9.0/libcudart_9.0_constants.jl")
 include("CUDART/9.0/libcudart_9.0_functions.jl")
@@ -125,7 +125,7 @@ using ..CUDA_9_1
 using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-include("load_cudart.jl")
+include("CUDART/9.1/load_cudart_9.1.jl")
 include("CUDART/9.1/libcudart_9.1_exports.jl")
 include("CUDART/9.1/libcudart_9.1_constants.jl")
 include("CUDART/9.1/libcudart_9.1_functions.jl")
@@ -137,7 +137,7 @@ using ..CUDA_9_2
 using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-include("load_cudart.jl")
+include("CUDART/9.2/load_cudart_9.2.jl")
 include("CUDART/9.2/libcudart_9.2_exports.jl")
 include("CUDART/9.2/libcudart_9.2_constants.jl")
 include("CUDART/9.2/libcudart_9.2_functions.jl")
@@ -149,7 +149,7 @@ using ..CUDA_10_0
 using ..VectorTypes
 # CUDA runtime API is implemented over CUDA driver API
 include("cuda_vector_types_exports.jl")
-include("load_cudart.jl")
+include("CUDART/10.0/load_cudart_10.0.jl")
 include("CUDART/10.0/libcudart_10.0_exports.jl")
 include("CUDART/10.0/libcudart_10.0_constants.jl")
 include("CUDART/10.0/libcudart_10.0_functions.jl")
@@ -167,7 +167,7 @@ using ..DeviceArray
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
 include("cuda_library_types.jl")
-include("load_cublas.jl")
+include("CUBLAS/8.0/load_cublas_8.0.jl")
 include("CUBLAS/8.0/libcublas_8.0_exports.jl")
 include("CUBLAS/8.0/libcublas_8.0_constants.jl")
 include("CUBLAS/8.0/libcublas_8.0_functions.jl")
@@ -185,7 +185,7 @@ using ..DeviceArray
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
 include("cuda_library_types.jl")
-include("load_cublas.jl")
+include("CUBLAS/9.0/load_cublas_9.0.jl")
 include("CUBLAS/9.0/libcublas_9.0_exports.jl")
 include("CUBLAS/9.0/libcublas_9.0_constants.jl")
 include("CUBLAS/9.0/libcublas_9.0_functions.jl")
@@ -203,7 +203,7 @@ using ..DeviceArray
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
 include("cuda_library_types.jl")
-include("load_cublas.jl")
+include("CUBLAS/9.1/load_cublas_9.1.jl")
 include("CUBLAS/9.1/libcublas_9.1_exports.jl")
 include("CUBLAS/9.1/libcublas_9.1_constants.jl")
 include("CUBLAS/9.1/libcublas_9.1_functions.jl")
@@ -221,7 +221,7 @@ using ..DeviceArray
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
 include("cuda_library_types.jl")
-include("load_cublas.jl")
+include("CUBLAS/9.2/load_cublas_9.2.jl")
 include("CUBLAS/9.2/libcublas_9.2_exports.jl")
 include("CUBLAS/9.2/libcublas_9.2_constants.jl")
 include("CUBLAS/9.2/libcublas_9.2_functions.jl")
@@ -239,7 +239,7 @@ using ..DeviceArray
 include("cuda_vector_types_exports.jl")
 include("cuda_complex_exports.jl")
 include("cuda_library_types.jl")
-include("load_cublas.jl")
+include("CUBLAS/10.0/load_cublas_10.0.jl")
 include("CUBLAS/10.0/libcublas_10.0_exports.jl")
 include("CUBLAS/10.0/libcublas_10.0_constants.jl")
 include("CUBLAS/10.0/libcublas_10.0_functions.jl")
