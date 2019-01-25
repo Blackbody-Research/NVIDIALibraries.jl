@@ -110,11 +110,11 @@ end
 # copy 'n' elements (offsets are zero indexed)
 function unsafe_copyto!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset::Csize_t, n::Integer)::Array where T
     if (src.is_device)
-        cudaMemcpy(dst + doffset, src.ptr + soffset, sizeof(T) * n, cudaMemcpyDeviceToHost)
+        cudaMemcpy(Ptr{Nothing}(pointer(dst, doffset + 1)), src.ptr + (soffset * sizeof(T)), sizeof(T) * n, cudaMemcpyDeviceToHost)
     else
         ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
-            Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, dst)) + doffset,
-            src.ptr + soffset,
+            Ptr{Nothing}(pointer(dst, doffset + 1)),
+            src.ptr + (soffset * sizeof(T)),
             Csize_t(sizeof(T) * n))
     end
     return dst
@@ -123,11 +123,11 @@ end
 # copy 'n' elements (offsets are zero indexed)
 function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
     if (dst.is_device)
-        cudaMemcpy(dst.ptr + doffset, src + soffset, sizeof(T) * n, cudaMemcpyHostToDevice)
+        cudaMemcpy(dst.ptr + (doffset * sizeof(T)), Ptr{Nothing}(pointer(src, soffset + 1)), sizeof(T) * n, cudaMemcpyHostToDevice)
     else
         ccall(:memcpy, Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Csize_t),
-            dst.ptr + doffset,
-            Ptr{Nothing}(Base.unsafe_convert(Ptr{T}, src)) + soffset,
+            dst.ptr + (doffset * sizeof(T)),
+            Ptr{Nothing}(pointer(src, soffset + 1)),
             Csize_t(sizeof(T) * n))
     end
     return dst
