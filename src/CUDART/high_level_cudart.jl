@@ -40,9 +40,8 @@ cudaMemcpy(dst::Array{T}, src::Ptr{Cvoid}, count::Integer, kind::Cuint) where {T
 
 # CUDAArray functions
 using ..DeviceArray
-import Base: unsafe_copyto!, copyto!
 export cuda_allocate, deallocate!,
-        unsafe_copyto!, copyto!
+        unsafe_memcpy!, memcpy!
 
 @inline function cudaLaunchKernel(func::Ptr{Nothing}, grid::dim3, block::dim3, types::Tuple{Vararg{DataType}}, args...; kwargs...)
     return cudaLaunchKernel(func, grid, block, Tuple{types...}, map(_cast_cudaarray_args, args)...; kwargs...)
@@ -108,7 +107,7 @@ function deallocate!(ca::CUDAArray)
 end
 
 # copy 'n' elements (offsets are zero indexed)
-function unsafe_copyto!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset::Csize_t, n::Integer)::Array where T
+function unsafe_memcpy!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset::Csize_t, n::Integer)::Array where T
     if (src.is_device)
         cudaMemcpy(Ptr{Nothing}(pointer(dst, doffset + 1)), src.ptr + (soffset * sizeof(T)), sizeof(T) * n, cudaMemcpyDeviceToHost)
     else
@@ -121,7 +120,7 @@ function unsafe_copyto!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset
 end
 
 # copy 'n' elements (offsets are zero indexed)
-function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
+function unsafe_memcpy!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
     if (dst.is_device)
         cudaMemcpy(dst.ptr + (doffset * sizeof(T)), Ptr{Nothing}(pointer(src, soffset + 1)), sizeof(T) * n, cudaMemcpyHostToDevice)
     else
@@ -133,10 +132,10 @@ function unsafe_copyto!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset
     return dst
 end
 
-unsafe_copyto!(dst::Array, doffset::Integer, src::CUDAArray, soffset::Integer, n::Integer) = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
-unsafe_copyto!(dst::CUDAArray, doffset::Integer, src::Array, soffset::Integer, n::Integer) = unsafe_copyto!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+unsafe_memcpy!(dst::Array, doffset::Integer, src::CUDAArray, soffset::Integer, n::Integer) = unsafe_memcpy!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
+unsafe_memcpy!(dst::CUDAArray, doffset::Integer, src::Array, soffset::Integer, n::Integer) = unsafe_memcpy!(dst, Csize_t(doffset), src, Csize_t(soffset), n)
 
-function unsafe_copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
+function unsafe_memcpy!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     local src_byte_size::Csize_t = sizeof(src.element_type) * reduce(*, src.size)
     if (src.is_device && dst.is_device)
         cudaMemcpy(dst.ptr, src.ptr, src_byte_size, cudaMemcpyDeviceToDevice)
@@ -150,7 +149,7 @@ function unsafe_copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     return dst
 end
 
-function copyto!(dst::Array{T}, src::CUDAArray)::Array where T
+function memcpy!(dst::Array{T}, src::CUDAArray)::Array where T
     @assert (size(dst) == src.size)
     if (src.is_device)
         cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyDeviceToHost)
@@ -160,7 +159,7 @@ function copyto!(dst::Array{T}, src::CUDAArray)::Array where T
     return dst
 end
 
-function copyto!(dst::CUDAArray, src::Array{T})::CUDAArray where T
+function memcpy!(dst::CUDAArray, src::Array{T})::CUDAArray where T
     @assert (dst.size == size(src))
     if (dst.is_device)
         cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToDevice)
@@ -170,8 +169,8 @@ function copyto!(dst::CUDAArray, src::Array{T})::CUDAArray where T
     return dst
 end
 
-function copyto!(dst::CUDAArray, src::CUDAArray)::CUDAArray
+function memcpy!(dst::CUDAArray, src::CUDAArray)::CUDAArray
     @assert ((sizeof(dst.element_type) * reduce(*, dst.size))
             >= (sizeof(src.element_type) * reduce(*, src.size)))
-    return unsafe_copyto!(dst, src)
+    return unsafe_memcpy!(dst, src)
 end
