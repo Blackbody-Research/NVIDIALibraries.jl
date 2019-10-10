@@ -154,7 +154,7 @@ function memcpy!(dst::Array{T}, src::CUDAArray)::Array where T
     if (src.is_device)
         cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyDeviceToHost)
     else
-        cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyDeviceToHost)
+        cudaMemcpy(dst, src.ptr, sizeof(dst), cudaMemcpyHostToHost)
     end
     return dst
 end
@@ -164,7 +164,7 @@ function memcpy!(dst::CUDAArray, src::Array{T})::CUDAArray where T
     if (dst.is_device)
         cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToDevice)
     else
-        cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToDevice)
+        cudaMemcpy(dst.ptr, src, sizeof(src), cudaMemcpyHostToHost)
     end
     return dst
 end
