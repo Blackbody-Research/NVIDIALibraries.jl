@@ -66,9 +66,9 @@ function cublasHgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float16,
     local k::Cint
 
     # assign leading dimensions of A, B, and C
-    local lda::Cint = A.size[1]
-    local ldb::Cint = B.size[1]
-    local ldc::Cint = C.size[1]
+    local lda::Cint = max(1, A.size[1])
+    local ldb::Cint = max(1, B.size[1])
+    local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
     if (ta == 'N')
@@ -120,9 +120,9 @@ function cublasSgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float32,
     local k::Cint
 
     # assign leading dimensions of A, B, and C
-    local lda::Cint = A.size[1]
-    local ldb::Cint = B.size[1]
-    local ldc::Cint = C.size[1]
+    local lda::Cint = max(1, A.size[1])
+    local ldb::Cint = max(1, B.size[1])
+    local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
     if (ta == 'N')
@@ -174,9 +174,9 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
     local k::Cint
 
     # assign leading dimensions of A, B, and C
-    local lda::Cint = A.size[1]
-    local ldb::Cint = B.size[1]
-    local ldc::Cint = C.size[1]
+    local lda::Cint = max(1, A.size[1])
+    local ldb::Cint = max(1, B.size[1])
+    local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
     if (ta == 'N')
@@ -211,7 +211,7 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
     elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
         throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
-    
+
     local result::cublasStatus_t = cublasDgemm_v2(handle, transA, transB, m, n, k, alpha, Ptr{Float64}(A.ptr), lda, Ptr{Float64}(B.ptr), ldb, beta, Ptr{Float64}(C.ptr), ldc)
     @assert (result == cudaSuccess) ("cublasDgemm() error: " * cublasGetErrorName(result))
 end
@@ -258,9 +258,9 @@ function cublasGemmEx(handle::cublasHandle_t, algo::cublasGemmAlgo_t, ta::Char, 
     local k::Cint
 
     # assign leading dimensions of A, B, and C
-    local lda::Cint = A.size[1]
-    local ldb::Cint = B.size[1]
-    local ldc::Cint = C.size[1]
+    local lda::Cint = max(1, A.size[1])
+    local ldb::Cint = max(1, B.size[1])
+    local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
     if (ta == 'N')
