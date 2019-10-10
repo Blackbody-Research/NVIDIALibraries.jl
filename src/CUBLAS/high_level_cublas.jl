@@ -61,32 +61,49 @@ function cublasHgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float16,
             (C.element_type == Float16))
     local transA::cublasOperation_t
     local transB::cublasOperation_t
-    local m::Cint = Cint(C.size[1])
-    local n::Cint = Cint(C.size[2])
-    local k::Cint = Cint(A.size[2])
-    local lda::Cint, ldb::Cint
-    local ldc::Cint = m
+    local m::Cint
+    local n::Cint
+    local k::Cint
 
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = A.size[1]
+    local ldb::Cint = B.size[1]
+    local ldc::Cint = C.size[1]
+
+    # assign values of M, N, K
     if (ta == 'N')
         transA = CUBLAS_OP_N
-        lda = m
+        m = A.size[1]
+        k = A.size[2]
     elseif (ta == 'T')
         transA = CUBLAS_OP_T
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     elseif (ta == 'C')
         transA = CUBLAS_OP_C
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     end
     if (tb == 'N')
         transB = CUBLAS_OP_N
-        ldb = k
+        n = B.size[2]
     elseif (tb == 'T')
         transB = CUBLAS_OP_T
-        ldb = n
+        n = B.size[1]
     elseif (tb == 'C')
         transB = CUBLAS_OP_C
-        ldb = n
+        n = B.size[1]
     end
+
+    # check if dimensions are wrong
+    if (m != C.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
+    elseif (n != C.size[2])
+        throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
+    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+        throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
+    end
+
     local result::cublasStatus_t = cublasHgemm(handle, transA, transB, m, n, k, alpha, Ptr{Float16}(A.ptr), lda, Ptr{Float16}(B.ptr), ldb, beta, Ptr{Float16}(C.ptr), ldc)
     @assert (result == cudaSuccess) ("cublasHgemm() error: " * cublasGetErrorName(result))
 end
@@ -98,32 +115,49 @@ function cublasSgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float32,
             (C.element_type == Float32))
     local transA::cublasOperation_t
     local transB::cublasOperation_t
-    local m::Cint = Cint(C.size[1])
-    local n::Cint = Cint(C.size[2])
-    local k::Cint = Cint(A.size[2])
-    local lda::Cint, ldb::Cint
-    local ldc::Cint = m
+    local m::Cint
+    local n::Cint
+    local k::Cint
 
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = A.size[1]
+    local ldb::Cint = B.size[1]
+    local ldc::Cint = C.size[1]
+
+    # assign values of M, N, K
     if (ta == 'N')
         transA = CUBLAS_OP_N
-        lda = m
+        m = A.size[1]
+        k = A.size[2]
     elseif (ta == 'T')
         transA = CUBLAS_OP_T
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     elseif (ta == 'C')
         transA = CUBLAS_OP_C
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     end
     if (tb == 'N')
         transB = CUBLAS_OP_N
-        ldb = k
+        n = B.size[2]
     elseif (tb == 'T')
         transB = CUBLAS_OP_T
-        ldb = n
+        n = B.size[1]
     elseif (tb == 'C')
         transB = CUBLAS_OP_C
-        ldb = n
+        n = B.size[1]
     end
+
+    # check if dimensions are wrong
+    if (m != C.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
+    elseif (n != C.size[2])
+        throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
+    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+        throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
+    end
+
     local result::cublasStatus_t = cublasSgemm_v2(handle, transA, transB, m, n, k, alpha, Ptr{Float32}(A.ptr), lda, Ptr{Float32}(B.ptr), ldb, beta, Ptr{Float32}(C.ptr), ldc)
     @assert (result == cudaSuccess) ("cublasSgemm() error: " * cublasGetErrorName(result))
 end
@@ -135,32 +169,49 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
             (C.element_type == Float64))
     local transA::cublasOperation_t
     local transB::cublasOperation_t
-    local m::Cint = Cint(C.size[1])
-    local n::Cint = Cint(C.size[2])
-    local k::Cint = Cint(A.size[2])
-    local lda::Cint, ldb::Cint
-    local ldc::Cint = m
+    local m::Cint
+    local n::Cint
+    local k::Cint
 
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = A.size[1]
+    local ldb::Cint = B.size[1]
+    local ldc::Cint = C.size[1]
+
+    # assign values of M, N, K
     if (ta == 'N')
         transA = CUBLAS_OP_N
-        lda = m
+        m = A.size[1]
+        k = A.size[2]
     elseif (ta == 'T')
         transA = CUBLAS_OP_T
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     elseif (ta == 'C')
         transA = CUBLAS_OP_C
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     end
     if (tb == 'N')
         transB = CUBLAS_OP_N
-        ldb = k
+        n = B.size[2]
     elseif (tb == 'T')
         transB = CUBLAS_OP_T
-        ldb = n
+        n = B.size[1]
     elseif (tb == 'C')
         transB = CUBLAS_OP_C
-        ldb = n
+        n = B.size[1]
     end
+
+    # check if dimensions are wrong
+    if (m != C.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
+    elseif (n != C.size[2])
+        throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
+    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+        throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
+    end
+    
     local result::cublasStatus_t = cublasDgemm_v2(handle, transA, transB, m, n, k, alpha, Ptr{Float64}(A.ptr), lda, Ptr{Float64}(B.ptr), ldb, beta, Ptr{Float64}(C.ptr), ldc)
     @assert (result == cudaSuccess) ("cublasDgemm() error: " * cublasGetErrorName(result))
 end
@@ -202,31 +253,47 @@ end
 function cublasGemmEx(handle::cublasHandle_t, algo::cublasGemmAlgo_t, ta::Char, tb::Char, alpha::T, A::CUDAArray, B::CUDAArray, beta::T, C::CUDAArray)::Nothing where T
     local transA::cublasOperation_t
     local transB::cublasOperation_t
-    local m::Cint = Cint(C.size[1])
-    local n::Cint = Cint(C.size[2])
-    local k::Cint = Cint(A.size[2])
-    local lda::Cint, ldb::Cint
-    local ldc::Cint = m
+    local m::Cint
+    local n::Cint
+    local k::Cint
 
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = A.size[1]
+    local ldb::Cint = B.size[1]
+    local ldc::Cint = C.size[1]
+
+    # assign values of M, N, K
     if (ta == 'N')
         transA = CUBLAS_OP_N
-        lda = m
+        m = A.size[1]
+        k = A.size[2]
     elseif (ta == 'T')
         transA = CUBLAS_OP_T
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     elseif (ta == 'C')
         transA = CUBLAS_OP_C
-        lda = k
+        m = A.size[2]
+        k = A.size[1]
     end
     if (tb == 'N')
         transB = CUBLAS_OP_N
-        ldb = k
+        n = B.size[2]
     elseif (tb == 'T')
         transB = CUBLAS_OP_T
-        ldb = n
+        n = B.size[1]
     elseif (tb == 'C')
         transB = CUBLAS_OP_C
-        ldb = n
+        n = B.size[1]
+    end
+
+    # check if dimensions are wrong
+    if (m != C.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
+    elseif (n != C.size[2])
+        throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
+    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+        throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
 
     @assert (A.element_type == B.element_type)
