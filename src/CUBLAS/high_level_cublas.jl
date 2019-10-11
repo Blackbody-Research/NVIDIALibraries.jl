@@ -73,26 +73,26 @@ function cublasHgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float16,
     local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
         m = A.size[1]
         k = A.size[2]
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
         m = A.size[2]
         k = A.size[1]
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
         m = A.size[2]
         k = A.size[1]
     end
-    if (tb == 'N')
+    if (tb === 'N')
         transB = CUBLAS_OP_N
         n = B.size[2]
-    elseif (tb == 'T')
+    elseif (tb === 'T')
         transB = CUBLAS_OP_T
         n = B.size[1]
-    elseif (tb == 'C')
+    elseif (tb === 'C')
         transB = CUBLAS_OP_C
         n = B.size[1]
     end
@@ -102,7 +102,7 @@ function cublasHgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float16,
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
     elseif (n != C.size[2])
         throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
-    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+    elseif (!(((tb === 'N') && (k == B.size[1])) || (((tb === 'T') || (tb === 'C')) && (k == B.size[2]))))
         throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
 
@@ -127,26 +127,26 @@ function cublasSgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float32,
     local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
         m = A.size[1]
         k = A.size[2]
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
         m = A.size[2]
         k = A.size[1]
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
         m = A.size[2]
         k = A.size[1]
     end
-    if (tb == 'N')
+    if (tb === 'N')
         transB = CUBLAS_OP_N
         n = B.size[2]
-    elseif (tb == 'T')
+    elseif (tb === 'T')
         transB = CUBLAS_OP_T
         n = B.size[1]
-    elseif (tb == 'C')
+    elseif (tb === 'C')
         transB = CUBLAS_OP_C
         n = B.size[1]
     end
@@ -156,7 +156,7 @@ function cublasSgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float32,
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
     elseif (n != C.size[2])
         throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
-    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+    elseif (!(((tb === 'N') && (k == B.size[1])) || (((tb === 'T') || (tb === 'C')) && (k == B.size[2]))))
         throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
 
@@ -181,26 +181,26 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
     local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
         m = A.size[1]
         k = A.size[2]
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
         m = A.size[2]
         k = A.size[1]
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
         m = A.size[2]
         k = A.size[1]
     end
-    if (tb == 'N')
+    if (tb === 'N')
         transB = CUBLAS_OP_N
         n = B.size[2]
-    elseif (tb == 'T')
+    elseif (tb === 'T')
         transB = CUBLAS_OP_T
         n = B.size[1]
-    elseif (tb == 'C')
+    elseif (tb === 'C')
         transB = CUBLAS_OP_C
         n = B.size[1]
     end
@@ -210,7 +210,7 @@ function cublasDgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float64,
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
     elseif (n != C.size[2])
         throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
-    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+    elseif (!(((tb === 'N') && (k == B.size[1])) || (((tb === 'T') || (tb === 'C')) && (k == B.size[2]))))
         throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
 
@@ -265,26 +265,26 @@ function cublasGemmEx(handle::cublasHandle_t, algo::cublasGemmAlgo_t, ta::Char, 
     local ldc::Cint = max(1, C.size[1])
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
         m = A.size[1]
         k = A.size[2]
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
         m = A.size[2]
         k = A.size[1]
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
         m = A.size[2]
         k = A.size[1]
     end
-    if (tb == 'N')
+    if (tb === 'N')
         transB = CUBLAS_OP_N
         n = B.size[2]
-    elseif (tb == 'T')
+    elseif (tb === 'T')
         transB = CUBLAS_OP_T
         n = B.size[1]
-    elseif (tb == 'C')
+    elseif (tb === 'C')
         transB = CUBLAS_OP_C
         n = B.size[1]
     end
@@ -294,7 +294,7 @@ function cublasGemmEx(handle::cublasHandle_t, algo::cublasGemmAlgo_t, ta::Char, 
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of rows in C (m), $(C.size[1])"))
     elseif (n != C.size[2])
         throw(DimensionMismatch("number of columns in B (n), $n, does not equal the number of columns in C (n), $(C.size[2])"))
-    elseif (!(((tb == 'N') && (k == B.size[1])) || ((tb == 'T') && (k == B.size[2]))))
+    elseif (!(((tb === 'N') && (k == B.size[1])) || (((tb === 'T') || (tb === 'C')) && (k == B.size[2]))))
         throw(DimensionMismatch("number of columns in A (k) does not equal the number of rows in B (k)"))
     end
 
@@ -341,19 +341,23 @@ function cublasSgemv(handle::cublasHandle_t, ta::Char, alpha::Float32, A::CUDAAr
     local ldy::Cint = 1
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
     end
 
     # check if dimensions are wrong
-    if (n != x.size[1])
-        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[2])"))
-    elseif (m != y.size[1])
+    if ((ta === 'N') && (n != x.size[1]))
+        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[1])"))
+    elseif (((ta === 'T') || (ta === 'C')) && (m != x.size[1]))
+        throw(DimensionMismatch("number of columns in A (m), $m, does not equal the number of components in x (m), $(x.size[1])"))
+    elseif ((ta === 'N') && (m != y.size[1]))
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of components in y (m), $(y.size[1])"))
+    elseif (((ta === 'T') || (ta === 'C')) && (n != y.size[1]))
+        throw(DimensionMismatch("number of rows in A (n), $n, does not equal the number of components in y (n), $(y.size[1])"))
     elseif (length(x.size) != 1)
         throw(DimensionMismatch("x ($(length(x.size)) dimension(s)) is not a vector"))
     elseif (length(y.size) != 1)
@@ -379,19 +383,23 @@ function cublasDgemv(handle::cublasHandle_t, ta::Char, alpha::Float64, A::CUDAAr
     local ldy::Cint = 1
 
     # assign values of M, N, K
-    if (ta == 'N')
+    if (ta === 'N')
         transA = CUBLAS_OP_N
-    elseif (ta == 'T')
+    elseif (ta === 'T')
         transA = CUBLAS_OP_T
-    elseif (ta == 'C')
+    elseif (ta === 'C')
         transA = CUBLAS_OP_C
     end
 
     # check if dimensions are wrong
-    if (n != x.size[1])
-        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[2])"))
-    elseif (m != y.size[1])
+    if ((ta === 'N') && (n != x.size[1]))
+        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[1])"))
+    elseif (((ta === 'T') || (ta === 'C')) && (m != x.size[1]))
+        throw(DimensionMismatch("number of columns in A (m), $m, does not equal the number of components in x (m), $(x.size[1])"))
+    elseif ((ta === 'N') && (m != y.size[1]))
         throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of components in y (m), $(y.size[1])"))
+    elseif (((ta === 'T') || (ta === 'C')) && (n != y.size[1]))
+        throw(DimensionMismatch("number of rows in A (n), $n, does not equal the number of components in y (n), $(y.size[1])"))
     elseif (length(x.size) != 1)
         throw(DimensionMismatch("x ($(length(x.size)) dimension(s)) is not a vector"))
     elseif (length(y.size) != 1)
