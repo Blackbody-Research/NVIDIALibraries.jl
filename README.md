@@ -11,6 +11,13 @@ NVIDIALibraries.jl defines C definitions and functions as they would appear in a
 - CUDA Runtime library (NVIDIALibraries.CUDARuntime)
 - CUBLAS library (NVIDIALibraries.CUBLAS)
 
+## Supported CUDA Toolkit Versions
+- 8.0
+- 9.0
+- 9.1
+- 9.2
+- 10.0
+
 ## How do I add this Julia package?
 Enter the Pkg REPL-mode from the Julia REPL by using the key `]`.
 
