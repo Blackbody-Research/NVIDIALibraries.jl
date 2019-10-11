@@ -55,6 +55,8 @@ end
 # CUDAArray functions
 using ..DeviceArray
 
+# GEMM functions
+
 function cublasHgemm(handle::cublasHandle_t, ta::Char, tb::Char, alpha::Float16, A::CUDAArray, B::CUDAArray, beta::Float16, C::CUDAArray)::Nothing
     @assert ((A.element_type == Float16) &&
             (B.element_type == Float16) &&
@@ -322,3 +324,80 @@ function cublasGemmEx(handle::cublasHandle_t, algo::cublasGemmAlgo_t, ta::Char, 
     @assert (result == cudaSuccess) ("cublasGemmEx() error: " * cublasGetErrorName(result))
 end
 
+# GEMV functions
+
+# use cublasSgemv_v2() over legacy cublasSgemv()
+function cublasSgemv(handle::cublasHandle_t, ta::Char, alpha::Float32, A::CUDAArray, x::CUDAArray, beta::Float32, y::CUDAArray)::Nothing
+    @assert ((A.element_type == Float32) &&
+            (x.element_type == Float32) &&
+            (y.element_type == Float32))
+    local transA::cublasOperation_t
+    local m::Cint = A.size[1]
+    local n::Cint = A.size[2]
+
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = max(1, A.size[1])
+    local ldx::Cint = 1
+    local ldy::Cint = 1
+
+    # assign values of M, N, K
+    if (ta == 'N')
+        transA = CUBLAS_OP_N
+    elseif (ta == 'T')
+        transA = CUBLAS_OP_T
+    elseif (ta == 'C')
+        transA = CUBLAS_OP_C
+    end
+
+    # check if dimensions are wrong
+    if (n != x.size[1])
+        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[2])"))
+    elseif (m != y.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of components in y (m), $(y.size[1])"))
+    elseif (length(x.size) != 1)
+        throw(DimensionMismatch("x ($(length(x.size)) dimension(s)) is not a vector"))
+    elseif (length(y.size) != 1)
+        throw(DimensionMismatch("y ($(length(y.size)) dimension(s)) is not a vector"))
+    end
+
+    local result::cublasStatus_t = cublasSgemv_v2(handle, transA, m, n, alpha, Ptr{Float32}(A.ptr), lda, Ptr{Float32}(x.ptr), ldx, beta, Ptr{Float32}(y.ptr), ldy)
+    @assert (result == cudaSuccess) ("cublasSgemv() error: " * cublasGetErrorName(result))
+end
+
+# use cublasDgemv_v2() over legacy cublasDgemv()
+function cublasDgemv(handle::cublasHandle_t, ta::Char, alpha::Float64, A::CUDAArray, x::CUDAArray, beta::Float64, y::CUDAArray)::Nothing
+    @assert ((A.element_type == Float64) &&
+            (x.element_type == Float64) &&
+            (y.element_type == Float64))
+    local transA::cublasOperation_t
+    local m::Cint = A.size[1]
+    local n::Cint = A.size[2]
+
+    # assign leading dimensions of A, B, and C
+    local lda::Cint = max(1, A.size[1])
+    local ldx::Cint = 1
+    local ldy::Cint = 1
+
+    # assign values of M, N, K
+    if (ta == 'N')
+        transA = CUBLAS_OP_N
+    elseif (ta == 'T')
+        transA = CUBLAS_OP_T
+    elseif (ta == 'C')
+        transA = CUBLAS_OP_C
+    end
+
+    # check if dimensions are wrong
+    if (n != x.size[1])
+        throw(DimensionMismatch("number of columns in A (n), $n, does not equal the number of components in x (n), $(x.size[2])"))
+    elseif (m != y.size[1])
+        throw(DimensionMismatch("number of rows in A (m), $m, does not equal the number of components in y (m), $(y.size[1])"))
+    elseif (length(x.size) != 1)
+        throw(DimensionMismatch("x ($(length(x.size)) dimension(s)) is not a vector"))
+    elseif (length(y.size) != 1)
+        throw(DimensionMismatch("y ($(length(y.size)) dimension(s)) is not a vector"))
+    end
+
+    local result::cublasStatus_t = cublasDgemv_v2(handle, transA, m, n, alpha, Ptr{Float64}(A.ptr), lda, Ptr{Float64}(x.ptr), ldx, beta, Ptr{Float64}(y.ptr), ldy)
+    @assert (result == cudaSuccess) ("cublasDgemv() error: " * cublasGetErrorName(result))
+end
