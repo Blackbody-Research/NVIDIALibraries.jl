@@ -120,7 +120,7 @@ function unsafe_memcpy!(dst::Array{T}, doffset::Csize_t, src::CUDAArray, soffset
 end
 
 # copy 'n' elements (offsets are zero indexed)
-function unsafe_memcpy!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::Array where T
+function unsafe_memcpy!(dst::CUDAArray, doffset::Csize_t, src::Array{T}, soffset::Csize_t, n::Integer)::CUDAArray where T
     if (dst.is_device)
         cudaMemcpy(dst.ptr + (doffset * sizeof(T)), Ptr{Nothing}(pointer(src, soffset + 1)), sizeof(T) * n, cudaMemcpyHostToDevice)
     else

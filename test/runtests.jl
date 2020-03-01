@@ -21,7 +21,7 @@ using Test
 using Printf
 
 using NVIDIALibraries
-6
+
 @using_nvidialib_settings()
 
 c_int_array = zeros(Cint, 1)
