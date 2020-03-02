@@ -84,13 +84,17 @@ end
 
 function cuda_allocate(jl_array::Array{T})::CUDAArray where T
     local device_pointer_array::Array{Ptr{Nothing}, 1} = [C_NULL]
-    cudaMalloc(device_pointer_array, sizeof(jl_array))
+    local result::cudaError_t
+
+    result = cudaMalloc(device_pointer_array, sizeof(jl_array))
+    @assert (result === cudaSuccess) ("cudaMalloc() error: " * unsafe_string(cudaGetErrorName(result)))
 
     # allocate new array in device memory
     local devptr::Ptr{Nothing} = pop!(device_pointer_array)
 
     # copy data to the array in device memory
-    cudaMemcpy(devptr, jl_array, sizeof(jl_array), cudaMemcpyHostToDevice)
+    result = cudaMemcpy(devptr, jl_array, sizeof(jl_array), cudaMemcpyHostToDevice)
+    @assert (result === cudaSuccess) ("cudaMemcpy() error: " * unsafe_string(cudaGetErrorName(result)))
 
     local ca::CUDAArray = CUDAArray(devptr, size(jl_array), true, eltype(jl_array))
     finalizer(deallocate!, ca)
