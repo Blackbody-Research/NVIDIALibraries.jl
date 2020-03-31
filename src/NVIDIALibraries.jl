@@ -269,6 +269,24 @@ include("CUBLAS/10.0/libcublas_10.0_functions.jl")
 include("CUBLAS/high_level_cublas.jl")
 end # CUBLAS 10.0
 
+module CUBLAS_10_1
+using ..CUDA_10_1
+using ..CUDARuntime_10_1
+using ..VectorTypes
+using ..ComplexTypes
+using ..DeviceArray
+# CUBLAS should be loaded after CUDA/CUDA Runtime definitions are loaded
+# Export CUDA Complex and vector types from the CUBLAS module
+include("cuda_vector_types_exports.jl")
+include("cuda_complex_exports.jl")
+include("cuda_library_types.jl")
+include("CUBLAS/10.1/load_cublas_10.1.jl")
+include("CUBLAS/10.1/libcublas_10.1_exports.jl")
+include("CUBLAS/10.1/libcublas_10.1_constants.jl")
+include("CUBLAS/10.1/libcublas_10.1_functions.jl")
+include("CUBLAS/high_level_cublas.jl")
+end # CUBLAS 10.1
+
 using Printf
 
 function set_default_nvlib_settings()
