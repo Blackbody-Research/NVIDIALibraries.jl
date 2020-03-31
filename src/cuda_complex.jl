@@ -1,7 +1,7 @@
 #=*
 * CUDA Complex definitions and functions
 *
-* Copyright (C) 2018 Blackbody Research LLC
+* Copyright (C) 2018-2020 Blackbody Research LLC
 *       Author: Qijia (Michael) Jin
 *
 * This program is free software; you can redistribute it and/or

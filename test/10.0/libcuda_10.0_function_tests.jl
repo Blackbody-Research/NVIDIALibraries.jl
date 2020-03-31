@@ -6,7 +6,7 @@
 * In addition, these tests were taken from CUDA library driver v9.0 tests
 * and have not been tested on CUDA library driver v8.0.
 *
-* Copyright (C) 2018 Blackbody Research LLC
+* Copyright (C) 2018-2020 Blackbody Research LLC
 *       Author: Qijia (Michael) Jin
 *
 * This program is free software; you can redistribute it and/or
