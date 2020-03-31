@@ -656,7 +656,7 @@ function cublasDrotm_v2(handle::cublasHandle_t, n::Cint, x::Ptr{Cdouble}, incx::
     return ccall((:cublasDrotm_v2, libcublas), cublasStatus_t, (cublasHandle_t, Cint, Ptr{Cdouble}, Cint, Ptr{Cdouble}, Cint, Ptr{Cdouble},), handle, n, x, incx, y, incy, param)
 end
 
-function cublasRotmEx(handle::cublasHandle_t, n::Cint, x::Ptr{Nothing}, xType::cudaDataType, incx::Cint, y::Ptr{Nothing}, y::Ptr{Nothing}, yType::cudaDataType, incy::Cint, param::Ptr{Nothing}, paramType::cudaDataType, executionType::cudaDataType)::cublasStatus_t
+function cublasRotmEx(handle::cublasHandle_t, n::Cint, x::Ptr{Nothing}, xType::cudaDataType, incx::Cint, y::Ptr{Nothing}, yType::cudaDataType, incy::Cint, param::Ptr{Nothing}, paramType::cudaDataType, executionType::cudaDataType)::cublasStatus_t
     return ccall((:cublasRotmEx, libcublas), cublasStatus_t, (cublasHandle_t, Cint, Ptr{Nothing}, cudaDataType, Cint, Ptr{Nothing}, cudaDataType, Cint, Ptr{Nothing}, cudaDataType, cudaDataType,), handle, n, x, xType, incx, y, yType, incy, param, paramType, executionType)
 end
 
