@@ -167,6 +167,18 @@ include("CUDART/10.0/libcudart_10.0_functions.jl")
 include("CUDART/high_level_cudart.jl")
 end # CUDA Runtime 10.0
 
+module CUDARuntime_10_1
+using ..CUDA_10_1
+using ..VectorTypes
+# CUDA runtime API is implemented over CUDA driver API
+include("cuda_vector_types_exports.jl")
+include("CUDART/10.1/load_cudart_10.1.jl")
+include("CUDART/10.1/libcudart_10.1_exports.jl")
+include("CUDART/10.1/libcudart_10.1_constants.jl")
+include("CUDART/10.1/libcudart_10.1_functions.jl")
+include("CUDART/high_level_cudart.jl")
+end # CUDA Runtime 10.1
+
 module CUBLAS_8_0
 using ..CUDA_8_0
 using ..CUDARuntime_8_0
