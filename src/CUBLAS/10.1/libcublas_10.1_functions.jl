@@ -48,7 +48,7 @@ function cublasGetProperty(lptype::libraryPropertyType, value::Ptr{Cint})::cubla
 end
 
 function cublasGetCudartVersion()::Csize_t
-    return ccall((:cublasGetCudartVersion, libcublas), Csize_t, (,))
+    return ccall((:cublasGetCudartVersion, libcublas), Csize_t, ())
 end
 
 function cublasSetStream_v2(handle::cublasHandle_t, streamId::cudaStream_t)::cublasStatus_t
