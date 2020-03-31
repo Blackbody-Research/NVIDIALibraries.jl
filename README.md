@@ -17,6 +17,7 @@ NVIDIALibraries.jl defines C definitions and functions as they would appear in a
 - 9.1
 - 9.2
 - 10.0
+- 10.1
 
 ## How do I add this Julia package?
 Enter the Pkg REPL-mode from the Julia REPL by using the key `]`.
