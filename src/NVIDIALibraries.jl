@@ -96,6 +96,17 @@ module CUDA_10_0
     include("CUDA/high_level_cuda.jl")
 end # CUDA 10.0
 
+module CUDA_10_1
+    using ..DeviceArray
+    using ..VectorTypes
+
+    include("load_cuda.jl")
+    include("CUDA/10.1/libcuda_10.1_exports.jl")
+    include("CUDA/10.1/libcuda_10.1_constants.jl")
+    include("CUDA/10.1/libcuda_10.1_functions.jl")
+    include("CUDA/high_level_cuda.jl")
+end # CUDA 10.1
+
 module CUDARuntime_8_0
 using ..CUDA_8_0
 using ..VectorTypes
