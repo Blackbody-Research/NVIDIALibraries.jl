@@ -17,6 +17,22 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *=#
 
+function cudaGetDeviceCount()::Cint
+    local device_count::Array{Cint, 1} = zeros(Cint, 1)
+    local result::cudaError_t = cudaGetDeviceCount(device_count)
+    @assert (result == cudaSuccess) ("cudaGetDeviceCount() error: " * unsafe_string(cudaGetErrorString(result)))
+    return pop!(device_count)
+end
+
+function cudaGetDevice()::Cint
+    local device_count::Array{Cint, 1} = zeros(Cint, 1)
+    local result::cudaError_t = cudaGetDevice(device_count)
+    @assert (result == cudaSuccess) ("cudaGetDevice() error: " * unsafe_string(cudaGetErrorString(result)))
+    return pop!(device_count)
+end
+
+cudaSetDevice(device::Integer) = cudaSetDevice(Cint(device))
+
 function cudaStreamCreate()::cudaStream_t
     local stream_array::Array{cudaStream_t, 1} = [C_NULL]
     local result::cudaError_t = cudaStreamCreate(stream_array)
